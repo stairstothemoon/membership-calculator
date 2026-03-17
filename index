@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Membership & Staff Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f3ee;
+    --surface: #ffffff;
+    --border: #e0ddd6;
+    --text: #1a1916;
+    --muted: #7a7870;
+    --accent: #2d5a3d;
+    --accent-light: #e8f0eb;
+    --danger: #8b2635;
+    --danger-light: #f5eaec;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 300;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  h1 strong { font-weight: 500; }
+
+  .subtitle {
+    margin-top: 0.5rem;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .input-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .input-wrap input {
+    width: 100%;
+    padding: 8px 36px 8px 10px;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+
+  .input-wrap input::-webkit-outer-spin-button,
+  .input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .input-wrap input:focus { border-color: var(--accent); }
+
+  .input-wrap .suffix {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .hint {
+    font-size: 11px;
+    color: #aaa9a4;
+  }
+
+  .formula-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 4px;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 1.25rem;
+  }
+
+  .formula-bar .val { color: var(--text); font-weight: 500; }
+  .formula-bar .op { color: #bbb; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+
+  .metric {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 14px;
+    border: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .metric:hover { border-color: var(--border); }
+
+  .metric-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .metric-value {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .metric-value.positive { color: var(--accent); }
+  .metric-value.negative { color: var(--danger); }
+
+  .metric.featured {
+    background: var(--accent-light);
+    border-color: #c2d9c9;
+  }
+
+  .metric.featured .metric-value.positive { color: var(--accent); }
+
+  .metric.featured-neg {
+    background: var(--danger-light);
+    border-color: #e8c9cd;
+  }
+
+  .divider-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #c0bdb7;
+    margin: 1.25rem 0 0.75rem;
+  }
+
+  footer {
+    margin-top: 2rem;
+    font-size: 12px;
+    color: #bbb;
+    text-align: center;
+    font-family: var(--mono);
+  }
+
+  @media (max-width: 500px) {
+    .input-grid { grid-template-columns: 1fr 1fr; }
+    .results-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Planning Tool</p>
+    <h1>Membership &amp; <strong>Staff Calculator</strong></h1>
+    <p class="subtitle">Model membership targets, staffing needs, and operating income from key inputs.</p>
+  </header>
+
+  <div class="card">
+    <p class="card-title">Inputs</p>
+    <div class="input-grid">
+      <div class="field">
+        <label>Population</label>
+        <div class="input-wrap">
+          <input type="number" id="population" value="100000" min="0" />
+        </div>
+        <span class="hint">total people</span>
+      </div>
+      <div class="field">
+        <label>Aligned %</label>
+        <div class="input-wrap">
+          <input type="number" id="aligned" value="40" min="0" max="100" step="0.1" />
+          <span class="suffix">%</span>
+        </div>
+        <span class="hint">% of population aligned</span>
+      </div>
+      <div class="field">
+        <label>Membership %</label>
+        <div class="input-wrap">
+          <input type="number" id="membership_pct" value="25" min="0" max="100" step="0.1" />
+          <span class="suffix">%</span>
+        </div>
+        <span class="hint">% of aligned who join</span>
+      </div>
+      <div class="field">
+        <label>Member-to-Staff Ratio</label>
+        <div class="input-wrap">
+          <input type="number" id="ratio" value="150" min="1" />
+        </div>
+        <span class="hint">members per staff</span>
+      </div>
+      <div class="field">
+        <label>Cost per Staff</label>
+        <div class="input-wrap">
+          <input type="number" id="cost_per_staff" value="75000" min="0" />
+          <span class="suffix">$</span>
+        </div>
+        <span class="hint">annual cost per staff</span>
+      </div>
+      <div class="field">
+        <label>Dues Rate</label>
+        <div class="input-wrap">
+          <input type="number" id="dues_rate" value="1" min="0" max="100" step="0.1" />
+          <span class="suffix">%</span>
+        </div>
+        <span class="hint">% of member income</span>
+      </div>
+      <div class="field">
+        <label>Member Income</label>
+        <div class="input-wrap">
+          <input type="number" id="member_income" value="60000" min="0" />
+          <span class="suffix">$</span>
+        </div>
+        <span class="hint">avg annual income</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Results</p>
+
+    <div class="formula-bar">
+      <span>Members</span><span class="op">=</span>
+      <span class="val" id="f-pop">—</span>
+      <span class="op">×</span>
+      <span class="val" id="f-al">—</span>
+      <span class="op">×</span>
+      <span class="val" id="f-mp">—</span>
+      <span class="op">=</span>
+      <span class="val" id="f-mem-result">—</span>
+    </div>
+
+    <p class="divider-label">Membership</p>
+    <div class="results-grid">
+      <div class="metric">
+        <p class="metric-label">Membership Target</p>
+        <p class="metric-value" id="r-membership">—</p>
+      </div>
+      <div class="metric">
+        <p class="metric-label">Dues per Member</p>
+        <p class="metric-value" id="r-dues-per-member">—</p>
+      </div>
+      <div class="metric">
+        <p class="metric-label">Membership Revenue</p>
+        <p class="metric-value" id="r-revenue">—</p>
+      </div>
+    </div>
+
+    <p class="divider-label">Staffing</p>
+    <div class="results-grid">
+      <div class="metric">
+        <p class="metric-label">Staff Target</p>
+        <p class="metric-value" id="r-staff">—</p>
+      </div>
+      <div class="metric">
+        <p class="metric-label">Staff Cost</p>
+        <p class="metric-value" id="r-staffcost">—</p>
+      </div>
+    </div>
+
+    <p class="divider-label">Bottom Line</p>
+    <div class="results-grid">
+      <div class="metric featured" id="income-card">
+        <p class="metric-label">Operating Income</p>
+        <p class="metric-value positive" id="r-income">—</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>Built with Claude · Membership &amp; Staff Model</footer>
+</div>
+
+<script>
+function fmt(n) { return Math.round(n).toLocaleString(); }
+function fmtDollar(n) {
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (abs >= 1e9) return sign + '$' + (abs / 1e9).toFixed(2) + 'B';
+  if (abs >= 1e6) return sign + '$' + (abs / 1e6).toFixed(2) + 'M';
+  if (abs >= 1e3) return sign + '$' + (abs / 1e3).toFixed(1) + 'K';
+  return sign + '$' + Math.round(abs).toLocaleString();
+}
+
+function calc() {
+  const pop = parseFloat(document.getElementById('population').value) || 0;
+  const al  = parseFloat(document.getElementById('aligned').value) / 100 || 0;
+  const mp  = parseFloat(document.getElementById('membership_pct').value) / 100 || 0;
+  const ratio = parseFloat(document.getElementById('ratio').value) || 1;
+  const cps = parseFloat(document.getElementById('cost_per_staff').value) || 0;
+  const dr  = parseFloat(document.getElementById('dues_rate').value) / 100 || 0;
+  const mi  = parseFloat(document.getElementById('member_income').value) || 0;
+
+  const memberTarget  = pop * al * mp;
+  const staffTarget   = memberTarget / ratio;
+  const staffCost     = staffTarget * cps;
+  const duesPerMember = dr * mi;
+  const memberRevenue = memberTarget * duesPerMember;
+  const opIncome      = memberRevenue - staffCost;
+
+  document.getElementById('f-pop').textContent = fmt(pop);
+  document.getElementById('f-al').textContent  = (al * 100).toFixed(1) + '%';
+  document.getElementById('f-mp').textContent  = (mp * 100).toFixed(1) + '%';
+  document.getElementById('f-mem-result').textContent = fmt(memberTarget);
+
+  document.getElementById('r-membership').textContent     = fmt(memberTarget);
+  document.getElementById('r-staff').textContent          = fmt(staffTarget);
+  document.getElementById('r-dues-per-member').textContent = fmtDollar(duesPerMember);
+  document.getElementById('r-staffcost').textContent      = fmtDollar(staffCost);
+  document.getElementById('r-revenue').textContent        = fmtDollar(memberRevenue);
+
+  const incEl   = document.getElementById('r-income');
+  const incCard = document.getElementById('income-card');
+  incEl.textContent = fmtDollar(opIncome);
+  if (opIncome >= 0) {
+    incEl.className  = 'metric-value positive';
+    incCard.className = 'metric featured';
+  } else {
+    incEl.className  = 'metric-value negative';
+    incCard.className = 'metric featured-neg';
+  }
+}
+
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', calc));
+calc();
+</script>
+</body>
+</html>
