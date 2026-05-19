@@ -358,7 +358,7 @@ input.narrow { width: 90px; }
       <div class="step-body">
         <p class="step-prompt">Out of that majority of aligned people, what <strong>% need to be active members</strong> of your organization(s)?</p>
         <div class="input-row">
-          <input type="number" id="membership_pct" class="narrow" value="25" min="0" max="100" step="0.1" />
+          <input type="number" id="membership_pct" class="narrow" value="10" min="0" max="100" step="0.1" />
           <span class="unit">% of aligned</span>
         </div>
         <p class="step-hint">Use "real" members who have committed to your vision and actively participate — not just people on your email list or other vanity metrics.</p>
@@ -378,10 +378,10 @@ input.narrow { width: 90px; }
       <div class="step-body">
         <p class="step-prompt">Organizations need staffing to be effective, but how many staff depends on your organizing model. Thinking of your current or ideal organization, what is your <strong>member-to-staff ratio?</strong></p>
         <div class="input-row">
-          <input type="text" id="ratio" class="narrow" value="150" />
+          <input type="text" id="ratio" class="narrow" value="50" />
           <span class="unit">members per staff</span>
         </div>
-        <p class="step-hint">Divide the number of members by the number of staff (members ÷ staff).</p>
+        <p class="step-hint">Divide the number of members by the number of staff (members ÷ staff). For example, 100 members ÷ 10 staff = 10 members/staff.</p>
       </div>
     </div>
 
@@ -411,7 +411,7 @@ input.narrow { width: 90px; }
       <div class="step-body">
         <p class="step-prompt">Would your members pay dues? If yes, <strong>what % of their income</strong> would you want them to contribute?</p>
         <div class="input-row">
-          <input type="number" id="dues_rate" class="narrow" value="1" min="0" max="100" step="0.1" />
+          <input type="number" id="dues_rate" class="narrow" value="0.5" min="0" max="100" step="0.1" />
           <span class="unit">% of income</span>
         </div>
         <p class="step-hint">Enter 0% if no dues.</p>
