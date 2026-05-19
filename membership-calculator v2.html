@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Membership & Staffing Model Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --border: #e2e0da;
+  --border-light: #eceae5;
+  --text: #18181a;
+  --muted: #6b6a66;
+  --faint: #a8a7a3;
+  --accent: #1a4731;
+  --accent-bg: #eef5f1;
+  --accent-border: #b3d4c0;
+  --danger: #7a2030;
+  --danger-bg: #fdf2f3;
+  --danger-border: #e5bcc3;
+  --mono: 'IBM Plex Mono', monospace;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1.75rem 2rem 1.5rem;
+  text-align: center;
+}
+
+.wordmark {
+  font-family: var(--serif);
+  font-size: 1.9rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.35rem;
+}
+
+.wordmark em { font-style: italic; color: var(--muted); }
+
+.header-sub {
+  font-size: 13px;
+  color: var(--faint);
+  font-family: var(--mono);
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  max-width: 1080px;
+  margin: 0 auto;
+  min-height: calc(100vh - 105px);
+}
+
+/* Left guide */
+.guide {
+  padding: 2.5rem 2.5rem 3rem;
+  border-right: 1px solid var(--border);
+}
+
+.section-break {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2.25rem 0 2rem;
+}
+
+.section-break:first-child { margin-top: 0; }
+
+.section-break-line { flex: 1; height: 1px; background: var(--border); }
+
+.section-break-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 0 1rem;
+  margin-bottom: 2.25rem;
+}
+
+.step:last-child { margin-bottom: 0; }
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+  padding-top: 3px;
+  text-align: right;
+}
+
+.step-prompt {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.65;
+  margin-bottom: 0.9rem;
+}
+
+.step-prompt strong { font-weight: 500; }
+
+.step-hint {
+  font-size: 12px;
+  color: var(--faint);
+  line-height: 1.5;
+  margin-top: 0.45rem;
+  font-style: italic;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.input-row .unit {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+input[type="text"], input[type="number"] {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px 11px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -moz-appearance: textfield;
+}
+
+input[type="text"]:focus, input[type="number"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26,71,49,0.09);
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+input.wide { width: 160px; }
+input.narrow { width: 90px; }
+
+.preset-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.preset-btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 5px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  transition: all 0.12s;
+  line-height: 1;
+}
+
+.preset-btn:hover { border-color: var(--text); color: var(--text); }
+.preset-btn.on { background: var(--text); color: var(--surface); border-color: var(--text); }
+
+.custom-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+}
+
+.custom-row .label { font-size: 12px; color: var(--faint); }
+
+.callout {
+  background: var(--accent-bg);
+  border-left: 3px solid var(--accent-border);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 0.7rem 1rem;
+  margin-top: 0.9rem;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.callout .val {
+  font-family: var(--mono);
+  font-weight: 500;
+  color: var(--accent);
+  font-size: 15px;
+}
+
+/* Right rail */
+.results-rail {
+  padding: 2rem 1.75rem;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.rail-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 0.1rem;
+}
+
+.result-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 1.1rem;
+}
+
+.result-row .rlabel {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+  margin-bottom: 3px;
+}
+
+.result-row .rvalue {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.result-row .rformula {
+  font-size: 11px;
+  color: var(--faint);
+  font-family: var(--mono);
+  margin-top: 2px;
+}
+
+.income-card {
+  border-radius: var(--radius-lg);
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-top: auto;
+}
+
+.income-card.pos { background: var(--accent-bg); border-color: var(--accent-border); }
+.income-card.neg { background: var(--danger-bg); border-color: var(--danger-border); }
+
+.income-card .rlabel {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.income-card .rvalue {
+  font-family: var(--serif);
+  font-size: 2.1rem;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.income-card.pos .rvalue { color: var(--accent); }
+.income-card.neg .rvalue { color: var(--danger); }
+.income-card .rdesc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+@media (max-width: 760px) {
+  .shell { grid-template-columns: 1fr; }
+  .results-rail { position: static; height: auto; border-top: 1px solid var(--border); }
+  .guide { padding: 1.5rem; border-right: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">Membership &amp; Staffing <em>Model</em></div>
+  <p class="header-sub">A guided planning calculator · inputs on the left, live results on the right</p>
+</header>
+
+<div class="shell">
+
+  <div class="guide">
+
+    <div class="section-break" style="margin-top:0">
+      <div class="section-break-label">Part 1 — Membership</div>
+      <div class="section-break-line"></div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">1</span>
+      <div class="step-body">
+        <p class="step-prompt">Imagine your target geography or community. What is your estimate of the <strong>total population</strong> for that target?</p>
+        <div class="input-row">
+          <input type="text" id="population" class="wide" value="100,000" />
+          <span class="unit">people</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">2</span>
+      <div class="step-body">
+        <p class="step-prompt">If you're building a democratic majority, you need a majority to at least passively align with you (greater than 50%). What <strong>% would you set as your aligned majority goal?</strong></p>
+        <div class="preset-row" id="aligned-presets">
+          <button class="preset-btn"    onclick="selectPreset(51,this)">51%</button>
+          <button class="preset-btn on" onclick="selectPreset(60,this)">60%</button>
+          <button class="preset-btn"    onclick="selectPreset(75,this)">75%</button>
+          <button class="preset-btn"    onclick="selectPreset(90,this)">90%</button>
+        </div>
+        <div class="custom-row">
+          <span class="label">or custom:</span>
+          <input type="number" id="aligned" class="narrow" value="60" min="0" max="100" step="0.1" />
+          <span class="unit">%</span>
+        </div>
+        <div class="callout">
+          That means you are building toward an aligned majority of <span class="val" id="r-aligned">—</span> people.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">3</span>
+      <div class="step-body">
+        <p class="step-prompt">Out of that majority of aligned people, what <strong>% need to be active members</strong> of your organization(s)?</p>
+        <div class="input-row">
+          <input type="number" id="membership_pct" class="narrow" value="25" min="0" max="100" step="0.1" />
+          <span class="unit">% of aligned</span>
+        </div>
+        <p class="step-hint">Use "real" members who have committed to your vision and actively participate — not just people on your email list or other vanity metrics.</p>
+        <div class="callout">
+          That means you are building toward a membership goal of <span class="val" id="r-members">—</span> people.
+        </div>
+      </div>
+    </div>
+
+    <div class="section-break">
+      <div class="section-break-label">Part 2 — Staffing</div>
+      <div class="section-break-line"></div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">4</span>
+      <div class="step-body">
+        <p class="step-prompt">Organizations need staffing to be effective, but how many staff depends on your organizing model. Thinking of your current or ideal organization, what is your <strong>member-to-staff ratio?</strong></p>
+        <div class="input-row">
+          <input type="text" id="ratio" class="narrow" value="150" />
+          <span class="unit">members per staff</span>
+        </div>
+        <p class="step-hint">Divide the number of members by the number of staff (members ÷ staff).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">5</span>
+      <div class="step-body">
+        <p class="step-prompt">Enter an average <strong>"all-in" cost per staff member</strong> — this usually includes salary, payroll taxes, and fringe benefits.</p>
+        <div class="input-row">
+          <span class="unit">$</span>
+          <input type="text" id="cost_per_staff" class="wide" value="75,000" />
+          <span class="unit">per year</span>
+        </div>
+        <p class="step-hint">$75,000 is a reasonable placeholder if you're unsure.</p>
+        <div class="callout">
+          Based on your membership goal and ratio, you would need <span class="val" id="r-staff">—</span> staff to organize <span class="val" id="r-staff-members">—</span> members. This would cost <span class="val" id="r-staffcost">—</span>.
+        </div>
+      </div>
+    </div>
+
+    <div class="section-break">
+      <div class="section-break-label">Part 3 — Revenue</div>
+      <div class="section-break-line"></div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">6</span>
+      <div class="step-body">
+        <p class="step-prompt">Would your members pay dues? If yes, <strong>what % of their income</strong> would you want them to contribute?</p>
+        <div class="input-row">
+          <input type="number" id="dues_rate" class="narrow" value="1" min="0" max="100" step="0.1" />
+          <span class="unit">% of income</span>
+        </div>
+        <p class="step-hint">Enter 0% if no dues.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">7</span>
+      <div class="step-body">
+        <p class="step-prompt">What do you estimate is the <strong>average annual family income</strong> for your members?</p>
+        <div class="input-row">
+          <span class="unit">$</span>
+          <input type="text" id="member_income" class="wide" value="60,000" />
+          <span class="unit">per year</span>
+        </div>
+        <div class="callout">
+          Your average member's dues would be <span class="val" id="r-dpm">—</span> per year, generating <span class="val" id="r-revenue">—</span> annually in dues income.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <aside class="results-rail">
+
+    <p class="rail-title">Live results</p>
+
+    <div class="result-row">
+      <p class="rlabel">Membership target</p>
+      <p class="rvalue" id="rr-members">—</p>
+      <p class="rformula">Pop × Aligned% × Member%</p>
+    </div>
+
+    <div class="result-row">
+      <p class="rlabel">Staff target</p>
+      <p class="rvalue" id="rr-staff">—</p>
+      <p class="rformula">Members ÷ Ratio</p>
+    </div>
+
+    <div class="result-row">
+      <p class="rlabel">Dues per member</p>
+      <p class="rvalue" id="rr-dpm">—</p>
+      <p class="rformula">Dues rate × Member income</p>
+    </div>
+
+    <div class="result-row">
+      <p class="rlabel">Staff cost</p>
+      <p class="rvalue" id="rr-staffcost">—</p>
+      <p class="rformula">Staff × Cost per staff</p>
+    </div>
+
+    <div class="result-row">
+      <p class="rlabel">Membership revenue</p>
+      <p class="rvalue" id="rr-revenue">—</p>
+      <p class="rformula">Members × Dues per member</p>
+    </div>
+
+    <div class="income-card" id="income-card">
+      <p class="rlabel">Operating income</p>
+      <p class="rvalue" id="rr-income">—</p>
+      <p class="rdesc" id="rr-desc">Revenue − Staff cost</p>
+    </div>
+
+  </aside>
+
+</div>
+
+<script>
+function parseC(s){ return parseFloat(String(s).replace(/,/g,''))||0; }
+function fmtN(n){ return Math.round(n).toLocaleString('en-US'); }
+function fmtD(n){
+  const a=Math.abs(n), s=n<0?'-':'';
+  if(a>=1e9) return s+'$'+(a/1e9).toFixed(2)+'B';
+  if(a>=1e6) return s+'$'+(a/1e6).toFixed(2)+'M';
+  if(a>=1e3) return s+'$'+(a/1e3).toFixed(1)+'K';
+  return s+'$'+Math.round(a).toLocaleString();
+}
+
+function attachComma(id){
+  const el=document.getElementById(id);
+  if(!el||el.type!=='text') return;
+  el.addEventListener('focus',function(){ this.value=this.value.replace(/,/g,''); });
+  el.addEventListener('blur',function(){
+    const n=parseFloat(this.value.replace(/,/g,''));
+    if(!isNaN(n)) this.value=fmtN(n);
+    calc();
+  });
+  el.addEventListener('input', calc);
+}
+['population','ratio','cost_per_staff','member_income'].forEach(attachComma);
+
+function selectPreset(val, btn){
+  document.getElementById('aligned').value=val;
+  document.querySelectorAll('#aligned-presets .preset-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  calc();
+}
+
+document.getElementById('aligned').addEventListener('input',function(){
+  document.querySelectorAll('#aligned-presets .preset-btn').forEach(b=>b.classList.remove('on'));
+  calc();
+});
+['membership_pct','dues_rate'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+
+function calc(){
+  const pop   = parseC(document.getElementById('population').value);
+  const al    = (parseFloat(document.getElementById('aligned').value)||0)/100;
+  const mp    = (parseFloat(document.getElementById('membership_pct').value)||0)/100;
+  const ratio = parseC(document.getElementById('ratio').value)||1;
+  const cps   = parseC(document.getElementById('cost_per_staff').value);
+  const dr    = (parseFloat(document.getElementById('dues_rate').value)||0)/100;
+  const mi    = parseC(document.getElementById('member_income').value);
+
+  const aligned   = pop*al;
+  const members   = aligned*mp;
+  const staff     = members/ratio;
+  const dpm       = dr*mi;
+  const staffCost = staff*cps;
+  const revenue   = members*dpm;
+  const income    = revenue-staffCost;
+
+  document.getElementById('r-aligned').textContent       = fmtN(aligned);
+  document.getElementById('r-members').textContent       = fmtN(members);
+  document.getElementById('r-staff').textContent         = fmtN(staff);
+  document.getElementById('r-staff-members').textContent = fmtN(members);
+  document.getElementById('r-staffcost').textContent     = fmtD(staffCost);
+  document.getElementById('r-dpm').textContent           = fmtD(dpm);
+  document.getElementById('r-revenue').textContent       = fmtD(revenue);
+
+  document.getElementById('rr-members').textContent   = fmtN(members);
+  document.getElementById('rr-staff').textContent     = fmtN(staff);
+  document.getElementById('rr-dpm').textContent       = fmtD(dpm);
+  document.getElementById('rr-staffcost').textContent = fmtD(staffCost);
+  document.getElementById('rr-revenue').textContent   = fmtD(revenue);
+  document.getElementById('rr-income').textContent    = fmtD(income);
+
+  const card = document.getElementById('income-card');
+  const desc = document.getElementById('rr-desc');
+  if(income>=0){
+    card.className='income-card pos';
+    desc.textContent='Net income of '+fmtD(income)+' annually above staffing — available for other organizational costs.';
+  } else {
+    card.className='income-card neg';
+    desc.textContent='A gap of '+fmtD(Math.abs(income))+' annually remains to cover staffing at this scale.';
+  }
+}
+
+calc();
+</script>
+</body>
+</html>
