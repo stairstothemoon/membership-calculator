@@ -1,565 +1,1158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Membership & Staffing Model Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Can your organizing model scale? | Membership calculator</title>
+<meta name="description" content="A guided calculator that shows whether a staff-driven organizing model can grow to majority scale, and where its funding ceiling is.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg: #f7f6f3;
-  --surface: #ffffff;
-  --border: #e2e0da;
-  --border-light: #eceae5;
-  --text: #18181a;
-  --muted: #6b6a66;
-  --faint: #a8a7a3;
-  --accent: #1a4731;
-  --accent-bg: #eef5f1;
-  --accent-border: #b3d4c0;
-  --danger: #7a2030;
-  --danger-bg: #fdf2f3;
-  --danger-border: #e5bcc3;
-  --mono: 'IBM Plex Mono', monospace;
-  --serif: 'Instrument Serif', Georgia, serif;
-  --sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --radius: 8px;
-  --radius-lg: 12px;
+  --paper: #F4F5F1;
+  --ink: #1B2230;
+  --muted: #586172;
+  --rule: #D3D8CF;
+  --field: #FFFFFF;
+  --tint: #E6EAE2;
+  --green: #2E7A55;
+  --plum: #9C2F6B;
+  --slate: #4E6A8F;
+  --focus: #2F5FD0;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #13171E; --ink: #E6E8EC; --muted: #9AA3B2; --rule: #2E3541;
+    --field: #1B212B; --tint: #1F2631; --green: #5DBE8C; --plum: #E07AB2;
+    --slate: #8EA7CB; --focus: #8FB0FF;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #13171E; --ink: #E6E8EC; --muted: #9AA3B2; --rule: #2E3541;
+  --field: #1B212B; --tint: #1F2631; --green: #5DBE8C; --plum: #E07AB2;
+  --slate: #8EA7CB; --focus: #8FB0FF;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 16px); -webkit-text-size-adjust: 100%; }
 body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 15px;
-  line-height: 1.6;
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: var(--body); font-size: 1.0625rem; line-height: 1.62;
+  font-optical-sizing: auto;
 }
+img, svg { max-width: 100%; }
+a { color: inherit; text-underline-offset: 0.18em; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 3px; }
+.vh { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 1.75rem 2rem 1.5rem;
-  text-align: center;
+/* ---------- layout ---------- */
+.page {
+  max-width: 1120px; margin: 0 auto; padding: 28px 22px 120px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px;
 }
-
-.wordmark {
-  font-family: var(--serif);
-  font-size: 1.9rem;
-  color: var(--text);
-  letter-spacing: -0.01em;
-  margin-bottom: 0.35rem;
+@media (min-width: 1100px) {
+  .page { grid-template-columns: minmax(0, 680px) 300px; justify-content: space-between; padding-bottom: 80px; }
 }
+.masthead { font-family: var(--display); font-size: 0.9rem; color: var(--muted); margin: 0 0 56px; }
+.masthead a { text-decoration: none; border-bottom: 1px solid var(--rule); }
+.masthead a:hover { border-bottom-color: currentColor; }
 
-.wordmark em { font-style: italic; color: var(--muted); }
-
-.header-sub {
-  font-size: 13px;
-  color: var(--faint);
-  font-family: var(--mono);
+/* ---------- type ---------- */
+h1 {
+  font-family: var(--display); font-variation-settings: "wdth" 115; font-weight: 820;
+  font-size: clamp(2.3rem, 6vw, 3.9rem); line-height: 0.98; letter-spacing: -0.015em;
+  margin: 0 0 28px; max-width: 13ch;
 }
-
-.shell {
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  max-width: 1080px;
-  margin: 0 auto;
-  min-height: calc(100vh - 105px);
+h2 {
+  font-family: var(--display); font-variation-settings: "wdth" 104; font-weight: 750;
+  font-size: clamp(1.45rem, 3vw, 1.85rem); line-height: 1.1; margin: 0 0 18px;
 }
+h3 { font-family: var(--display); font-weight: 700; font-size: 1.05rem; margin: 0 0 8px; }
+p { margin: 0 0 1em; max-width: 64ch; }
+.lede { font-size: 1.2rem; line-height: 1.55; }
+.small { font-size: 0.92rem; color: var(--muted); }
+.num { font-family: var(--display); font-variant-numeric: tabular-nums; font-weight: 700; font-variation-settings: "wdth" 96; white-space: nowrap; }
+.num.plum { color: var(--plum); }
+.num.green { color: var(--green); }
 
-/* Left guide */
-.guide {
-  padding: 2.5rem 2.5rem 3rem;
-  border-right: 1px solid var(--border);
+/* ---------- steps ---------- */
+.step { position: relative; padding: 44px 0 8px; border-top: 2px solid var(--ink); margin-top: 44px; }
+.step[hidden] { display: none; }
+.step-n {
+  font-family: var(--display); font-variation-settings: "wdth" 70; font-weight: 800;
+  font-size: 1rem; color: var(--muted); display: block; margin-bottom: 10px;
 }
-
-.section-break {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 2.25rem 0 2rem;
+@media (min-width: 900px) {
+  .step-n { position: absolute; left: -64px; top: 40px; font-size: 2.6rem; line-height: 1; color: var(--rule); }
 }
-
-.section-break:first-child { margin-top: 0; }
-
-.section-break-line { flex: 1; height: 1px; background: var(--border); }
-
-.section-break-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--faint);
-  white-space: nowrap;
+.field { margin: 0 0 26px; }
+.field > label, .field > .label, fieldset legend {
+  display: block; font-family: var(--display); font-weight: 650; font-size: 1.02rem; margin-bottom: 4px; padding: 0;
 }
-
-.step {
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  gap: 0 1rem;
-  margin-bottom: 2.25rem;
+.hint { display: block; font-size: 0.93rem; color: var(--muted); margin: 0 0 10px; max-width: 60ch; }
+fieldset { border: 0; margin: 0 0 26px; padding: 0; min-width: 0; }
+.input-wrap { display: inline-flex; align-items: center; gap: 8px; }
+.affix { font-family: var(--display); color: var(--muted); }
+input[type="text"], select {
+  font: inherit; font-family: var(--display); font-variant-numeric: tabular-nums; font-size: 1.15rem;
+  color: var(--ink); background: var(--field); border: 1.5px solid var(--rule); border-radius: 6px;
+  padding: 9px 12px; min-height: 46px;
 }
+input[type="text"] { width: 11ch; }
+input[type="text"].wide { width: 15ch; }
+select { width: 100%; max-width: 30rem; font-size: 1rem; }
+input[type="text"]:hover, select:hover { border-color: var(--muted); }
+.pair { display: flex; flex-wrap: wrap; gap: 18px 36px; }
 
-.step:last-child { margin-bottom: 0; }
-
-.step-num {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--faint);
-  padding-top: 3px;
-  text-align: right;
+/* chips: radio inputs styled as pills */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chip label {
+  display: inline-flex; flex-direction: column; align-items: flex-start; cursor: pointer;
+  border: 1.5px solid var(--rule); border-radius: 999px; padding: 7px 16px; background: var(--field);
+  font-family: var(--display); font-weight: 650; font-size: 0.98rem; line-height: 1.2;
 }
+.chip label small { font-weight: 450; font-size: 0.78rem; color: var(--muted); font-variation-settings: "wdth" 92; }
+.chip.tall label { border-radius: 14px; }
+.chip input:checked + label { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.chip input:checked + label small { color: var(--paper); opacity: 0.8; }
+.chip input:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
+.custom-inline { margin-top: 10px; }
+.custom-inline[hidden] { display: none; }
+.chips.mini .chip label { padding: 5px 13px; font-size: 0.9rem; }
 
-.step-prompt {
-  font-size: 15px;
-  color: var(--text);
-  line-height: 1.65;
-  margin-bottom: 0.9rem;
+/* ---------- output ---------- */
+.out {
+  background: var(--tint); border-radius: 4px 14px 14px 4px; border-left: 4px solid var(--ink);
+  padding: 18px 20px 4px; margin: 6px 0 26px;
 }
+.out[hidden] { display: none; }
+.out p { max-width: 60ch; }
+.out .big { font-size: 1.22rem; line-height: 1.5; }
 
-.step-prompt strong { font-weight: 500; }
+/* per-member bar: the recurring visual */
+.pm { margin: 4px 0 18px; }
+.pm-bar { display: flex; height: 30px; border-radius: 4px; overflow: hidden; background: var(--rule); }
+.pm-bar span { display: block; height: 100%; transition: width 0.35s ease; }
+.pm-bar .dues { background: var(--green); }
+.pm-bar .gap { background: repeating-linear-gradient(135deg, var(--plum) 0 7px, color-mix(in srgb, var(--plum) 78%, var(--paper)) 7px 11px); }
+.pm-legend { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; font-size: 0.93rem; }
+.pm-legend b { font-family: var(--display); font-variant-numeric: tabular-nums; }
+.pm-legend .k-dues b { color: var(--green); }
+.pm-legend .k-gap b { color: var(--plum); }
 
-.step-hint {
-  font-size: 12px;
-  color: var(--faint);
-  line-height: 1.5;
-  margin-top: 0.45rem;
-  font-style: italic;
+/* buttons */
+.btn {
+  font-family: var(--display); font-weight: 700; font-size: 1.02rem; cursor: pointer;
+  background: var(--ink); color: var(--paper); border: 2px solid var(--ink);
+  border-radius: 999px; padding: 11px 22px; min-height: 46px;
 }
+.btn:hover { background: color-mix(in srgb, var(--ink) 86%, var(--paper)); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.ghost:hover { background: var(--tint); }
+.linkish { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 0.18em; cursor: pointer; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin: 8px 0 0; }
+.req { font-size: 0.92rem; color: var(--muted); }
 
-.input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+/* structural limit: bars + track */
+h3.beat { font-size: 1.15rem; margin: 34px 0 10px; }
+h3.beat:first-child { margin-top: 0; }
+.bars { margin: 18px 0 8px; display: grid; gap: 14px; }
+.brow { display: grid; gap: 5px; }
+.brow .bl { display: flex; justify-content: space-between; gap: 12px; font-size: 0.95rem; }
+.brow .bl b { font-family: var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.brow .bt { height: 26px; background: var(--tint); border-radius: 3px; overflow: hidden; }
+.brow .bf { height: 100%; min-width: 3px; border-radius: 3px; transition: width 0.4s ease; }
+.brow.now .bf { background: var(--ink); }
+.brow.share .bf { background: var(--slate); }
+.brow.bill .bf { background: var(--plum); }
+.brow.bill .bl b { color: var(--plum); }
+.track { margin: 40px 0 14px; position: relative; padding: 0 2px; }
+.track .rail { position: relative; height: 18px; border-radius: 3px; overflow: hidden;
+  background: repeating-linear-gradient(135deg, var(--plum) 0 7px, color-mix(in srgb, var(--plum) 70%, var(--paper)) 7px 11px); }
+.track .funded { position: absolute; left: 0; top: 0; bottom: 0; background: var(--slate); transition: width 0.4s ease; }
+.track .mk { position: absolute; bottom: 100%; transform: translateX(-50%); font-family: var(--display); font-size: 0.82rem; font-weight: 650; white-space: nowrap; padding-bottom: 6px; }
+.track .mk::after { content: ""; position: absolute; left: 50%; bottom: -18px; height: 18px; border-left: 2px solid var(--ink); }
+.track .mks { position: relative; height: 0; z-index: 2; }
+.track .mk { bottom: 0; }
+.track .mk.lift { bottom: 22px; }
+.track .mk.lift::after { bottom: -40px; height: 40px; }
+.track .mk.l { transform: none; } .track .mk.l::after { left: 0; }
+.track .mk.r { transform: translateX(-100%); } .track .mk.r::after { left: auto; right: 0; }
+.track .ends { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--muted); margin-top: 6px; font-family: var(--display); }
+.track .key { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
+.track .key i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 6px; }
+details.more { margin-top: 26px; border-top: 1px solid var(--rule); padding-top: 14px; }
+details.more[open] summary { margin-bottom: 14px; }
+
+/* chart */
+.chart-wrap { margin: 8px 0 10px; overflow-x: auto; }
+.chart-wrap svg { display: block; width: 100%; height: auto; font-family: var(--display); }
+.chart-cap { font-size: 0.9rem; color: var(--muted); margin-bottom: 18px; }
+.toggle { display: flex; gap: 10px; align-items: flex-start; font-size: 0.95rem; margin: 6px 0 22px; }
+.toggle input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--slate); }
+
+/* sliders */
+.slider { margin: 0 0 24px; }
+.slider-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.slider-head output { font-family: var(--display); font-weight: 750; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--ink); height: 32px; }
+
+/* close */
+.closing { font-family: var(--display); font-variation-settings: "wdth" 108; font-weight: 700; font-size: clamp(1.25rem, 2.6vw, 1.6rem); line-height: 1.25; max-width: 30ch; margin: 0 0 24px; }
+details { border-top: 1px solid var(--rule); margin-top: 40px; padding-top: 14px; }
+summary { cursor: pointer; font-family: var(--display); font-weight: 650; }
+details ul { padding-left: 1.1em; font-size: 0.92rem; color: var(--muted); max-width: 66ch; }
+details li { margin-bottom: 8px; }
+
+/* ---------- ledger (desktop rail) ---------- */
+.ledger { display: none; }
+@media (min-width: 1100px) {
+  .ledger { display: block; }
+  .ledger-inner { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); margin-top: 104px; }
 }
+.ledger-inner { border: 2px solid var(--ink); border-radius: 4px; padding: 18px 18px 8px; background: var(--paper); }
+.ledger h3 { font-size: 0.95rem; margin: 0 0 10px; }
+.ledger dl { margin: 0 0 18px; display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 0.95rem; }
+.ledger dt { color: var(--muted); }
+.ledger dd { margin: 0; font-family: var(--display); font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.ledger .empty { color: var(--muted); font-size: 0.92rem; margin: 0 0 16px; }
+.ledger hr { border: 0; border-top: 1px solid var(--rule); margin: 4px 0 14px; }
 
-.input-row .unit {
-  font-size: 13px;
-  color: var(--muted);
-  font-family: var(--mono);
+/* ---------- ledger (mobile bar) ---------- */
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: var(--ink); color: var(--paper);
+  padding: 10px 18px calc(10px + env(safe-area-inset-bottom, 0px));
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px;
+  font-family: var(--display);
 }
+.bar[hidden] { display: none; }
+@media (min-width: 1100px) { .bar { display: none !important; } }
+.bar div { display: flex; flex-direction: column; }
+.bar div[hidden], .ledger [hidden] { display: none; }
+.bar span { font-size: 0.74rem; opacity: 0.75; }
+.bar b { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.bar .g b { color: color-mix(in srgb, var(--green) 60%, var(--paper)); }
+.bar .p b { color: color-mix(in srgb, var(--plum) 55%, var(--paper)); }
 
-input[type="text"], input[type="number"] {
-  font-family: var(--mono);
-  font-size: 14px;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 7px 11px;
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-  -moz-appearance: textfield;
+@media (prefers-reduced-motion: reduce) {
+  .pm-bar span, .brow .bf, .track .funded { transition: none; }
+  html { scroll-behavior: auto; }
 }
-
-input[type="text"]:focus, input[type="number"]:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(26,71,49,0.09);
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-
-input.wide { width: 160px; }
-input.narrow { width: 90px; }
-
-.preset-row {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-}
-
-.preset-btn {
-  font-family: var(--mono);
-  font-size: 12px;
-  padding: 5px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--muted);
-  transition: all 0.12s;
-  line-height: 1;
-}
-
-.preset-btn:hover { border-color: var(--text); color: var(--text); }
-.preset-btn.on { background: var(--text); color: var(--surface); border-color: var(--text); }
-
-.custom-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 4px;
-}
-
-.custom-row .label { font-size: 12px; color: var(--faint); }
-
-.callout {
-  background: var(--accent-bg);
-  border-left: 3px solid var(--accent-border);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 0.7rem 1rem;
-  margin-top: 0.9rem;
-  font-size: 14px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.callout .val {
-  font-family: var(--mono);
-  font-weight: 500;
-  color: var(--accent);
-  font-size: 15px;
-}
-
-/* Right rail */
-.results-rail {
-  padding: 2rem 1.75rem;
-  position: sticky;
-  top: 0;
-  align-self: start;
-  height: 100vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-
-.rail-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--faint);
-  margin-bottom: 0.1rem;
-}
-
-.result-row {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 0.85rem 1.1rem;
-}
-
-.result-row .rlabel {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--faint);
-  margin-bottom: 3px;
-}
-
-.result-row .rvalue {
-  font-family: var(--mono);
-  font-size: 20px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.result-row .rformula {
-  font-size: 11px;
-  color: var(--faint);
-  font-family: var(--mono);
-  margin-top: 2px;
-}
-
-.income-card {
-  border-radius: var(--radius-lg);
-  padding: 1.1rem 1.25rem;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  margin-top: auto;
-}
-
-.income-card.pos { background: var(--accent-bg); border-color: var(--accent-border); }
-.income-card.neg { background: var(--danger-bg); border-color: var(--danger-border); }
-
-.income-card .rlabel {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-
-.income-card .rvalue {
-  font-family: var(--serif);
-  font-size: 2.1rem;
-  line-height: 1.1;
-  margin-bottom: 6px;
-}
-
-.income-card.pos .rvalue { color: var(--accent); }
-.income-card.neg .rvalue { color: var(--danger); }
-.income-card .rdesc { font-size: 13px; color: var(--muted); line-height: 1.5; }
-
-@media (max-width: 760px) {
-  .shell { grid-template-columns: 1fr; }
-  .results-rail { position: static; height: auto; border-top: 1px solid var(--border); }
-  .guide { padding: 1.5rem; border-right: none; }
-}
+@media print { .bar, .ledger { display: none !important; } .step[hidden] { display: block; } }
 </style>
 </head>
 <body>
+<div class="page">
+<main id="main">
+  <p class="masthead">A calculator from <a href="https://stairstothemoon.substack.com/">Stairs to the Moon</a></p>
 
-<header>
-  <div class="wordmark">Membership &amp; Staffing <em>Model</em></div>
-  <p class="header-sub">A guided planning calculator · inputs on the left, live results on the right</p>
-</header>
-
-<div class="shell">
-
-  <div class="guide">
-
-    <div class="section-break" style="margin-top:0">
-      <div class="section-break-label">Part 1 — Membership</div>
-      <div class="section-break-line"></div>
+  <header>
+    <h1>Can your organizing model grow big enough to win?</h1>
+    <p class="lede">Most base-building organizations run on paid staff, funded by foundations and donors. That works at small scale. But if each member costs more to organize than they contribute, every new member widens the gap, and the outside money needed grows right along with you.</p>
+    <p>This tool shows where that limit is for your model. It takes about three minutes, and you only need two numbers to start: roughly how many members your organization has, and how many staff.</p>
+    <div class="actions">
+      <button class="btn" type="button" id="start">Start with your organization</button>
+      <button class="linkish small" type="button" id="showAll">Show all steps at once</button>
     </div>
+  </header>
 
-    <div class="step">
-      <span class="step-num">1</span>
-      <div class="step-body">
-        <p class="step-prompt">Imagine your target geography or community. What is your estimate of the <strong>total population</strong> for that target?</p>
-        <div class="input-row">
-          <input type="text" id="population" class="wide" value="100,000" />
-          <span class="unit">people</span>
-        </div>
+  <!-- STEP 1 -->
+  <section class="step" id="s1" hidden aria-labelledby="h1s">
+    <span class="step-n" aria-hidden="true">1</span>
+    <h2 id="h1s">Your organization</h2>
+    <p>Start with what you know. Rough numbers are fine.</p>
+    <div class="pair">
+      <div class="field">
+        <label for="members">Members</label>
+        <span class="hint" id="membersHint">People who actively participate, not your email list.</span>
+        <input type="text" inputmode="numeric" id="members" aria-describedby="membersHint" placeholder="e.g. 400" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="staff">Paid staff</label>
+        <span class="hint" id="staffHint">Full-time equivalents. Two half-time staff count as one.</span>
+        <input type="text" inputmode="decimal" id="staff" aria-describedby="staffHint" placeholder="e.g. 10" autocomplete="off">
       </div>
     </div>
+    <div class="field">
+      <label for="cps">All-in cost per staff member, per year</label>
+      <span class="hint" id="cpsHint">Salary plus payroll taxes and benefits. $75,000 is a reasonable placeholder if you're unsure.</span>
+      <span class="input-wrap"><span class="affix">$</span><input type="text" inputmode="numeric" id="cps" class="wide" value="75,000" aria-describedby="cpsHint" autocomplete="off"></span>
+    </div>
+    <p class="small"><button class="linkish" type="button" id="example">Not ready to use your own numbers? Fill in an example organization.</button></p>
+    <div class="out" id="o1" hidden aria-live="polite"><p class="big" id="o1text"></p></div>
+    <div class="actions">
+      <button class="btn" type="button" data-next="2" id="next1" disabled>Continue to dues</button>
+      <span class="req" id="req1">Enter members and staff to continue.</span>
+    </div>
+  </section>
 
-    <div class="step">
-      <span class="step-num">2</span>
-      <div class="step-body">
-        <p class="step-prompt">If you're building a democratic majority, you need a majority to at least passively align with you (greater than 50%). What <strong>% would you set as your aligned majority goal?</strong></p>
-        <div class="preset-row" id="aligned-presets">
-          <button class="preset-btn"    onclick="selectPreset(51,this)">51%</button>
-          <button class="preset-btn on" onclick="selectPreset(60,this)">60%</button>
-          <button class="preset-btn"    onclick="selectPreset(75,this)">75%</button>
-          <button class="preset-btn"    onclick="selectPreset(90,this)">90%</button>
+  <!-- STEP 2 -->
+  <section class="step" id="s2" hidden aria-labelledby="h2s">
+    <span class="step-n" aria-hidden="true">2</span>
+    <h2 id="h2s">Who pays for it?</h2>
+    <fieldset>
+      <legend>How much would each member pay in dues?</legend>
+      <span class="hint">Most options are a share of household income. Choose Other to enter your own percentage or a flat yearly amount. If your members don't pay dues today, try a number you'd consider asking for.</span>
+      <div class="chips" id="duesChips">
+        <span class="chip tall"><input type="radio" name="dues" id="d0" value="0"><label for="d0">0%<small>No dues</small></label></span>
+        <span class="chip tall"><input type="radio" name="dues" id="d05" value="0.5"><label for="d05">0.5%<small>&nbsp;</small></label></span>
+        <span class="chip tall"><input type="radio" name="dues" id="d1" value="1" checked><label for="d1">1%<small>Low end for unions</small></label></span>
+        <span class="chip tall"><input type="radio" name="dues" id="d2" value="2"><label for="d2">2%<small>High end for unions</small></label></span>
+        <span class="chip tall"><input type="radio" name="dues" id="d10" value="10"><label for="d10">10%<small>A tithe</small></label></span>
+        <span class="chip tall"><input type="radio" name="dues" id="dc" value="custom"><label for="dc">Other<small>&nbsp;</small></label></span>
+      </div>
+      <div class="custom-inline" id="duesCustomWrap" hidden>
+        <div class="chips mini" role="radiogroup" aria-label="Enter dues as">
+          <span class="chip"><input type="radio" name="duesMode" id="dmPct" value="pct" checked><label for="dmPct">% of income</label></span>
+          <span class="chip"><input type="radio" name="duesMode" id="dmFlat" value="flat"><label for="dmFlat">$ per year</label></span>
         </div>
-        <div class="custom-row">
-          <span class="label">or custom:</span>
-          <input type="number" id="aligned" class="narrow" value="60" min="0" max="100" step="0.1" />
-          <span class="unit">%</span>
-        </div>
-        <div class="callout">
-          That means you are building toward an aligned majority of <span class="val" id="r-aligned">—</span> people.
-        </div>
+        <label class="vh" for="duesCustom" id="duesCustomLabel">Custom dues percentage</label>
+        <span class="input-wrap" style="margin-top:10px">
+          <span class="affix" id="duesPre" hidden>$</span>
+          <input type="text" inputmode="decimal" id="duesCustom" placeholder="1.5" autocomplete="off" aria-describedby="duesFlatHint">
+          <span class="affix" id="duesPost">% of income</span>
+        </span>
+        <span class="hint" id="duesFlatHint" hidden style="margin-top:8px">For example, $10 a month is $120 a year.</span>
+      </div>
+    </fieldset>
+    <p class="small" id="incomeSkip" hidden>Household income isn’t needed when dues are a flat amount.</p>
+    <div class="field" id="incomeField">
+      <label for="income">Your members' typical household income</label>
+      <span class="hint" id="incomeHint">Pick the closest match. Figures are 2025 Census Bureau data. "Typical" means the median, the midpoint. "Lower-income" is two-thirds of that median, and "lowest-income" is the bottom tenth of households.</span>
+      <select id="income" aria-describedby="incomeHint"></select>
+      <div class="custom-inline" id="incomeCustomWrap" hidden>
+        <label class="vh" for="incomeCustom">Custom household income</label>
+        <span class="input-wrap"><span class="affix">$</span><input type="text" inputmode="numeric" id="incomeCustom" class="wide" placeholder="60,000" autocomplete="off"><span class="affix">per year</span></span>
       </div>
     </div>
-
-    <div class="step">
-      <span class="step-num">3</span>
-      <div class="step-body">
-        <p class="step-prompt">Out of that majority of aligned people, what <strong>% need to be active members</strong> of your organization(s)?</p>
-        <div class="input-row">
-          <input type="number" id="membership_pct" class="narrow" value="10" min="0" max="100" step="0.1" />
-          <span class="unit">% of aligned</span>
-        </div>
-        <p class="step-hint">Use "real" members who have committed to your vision and actively participate — not just people on your email list or other vanity metrics.</p>
-        <div class="callout">
-          That means you are building toward a membership goal of <span class="val" id="r-members">—</span> people.
+    <div class="out" id="o2" aria-live="polite">
+      <div class="pm" aria-hidden="true">
+        <div class="pm-bar"><span class="dues" id="pmDues"></span><span class="gap" id="pmGap"></span></div>
+        <div class="pm-legend">
+          <span class="k-dues">Dues per member <b id="pmDuesV"></b></span>
+          <span class="k-gap" id="pmGapLabel">Gap per member <b id="pmGapV"></b></span>
         </div>
       </div>
+      <div id="o2text"></div>
     </div>
+    <div class="actions"><button class="btn" type="button" data-next="3" id="next2">Continue to scale</button></div>
+  </section>
 
-    <div class="section-break">
-      <div class="section-break-label">Part 2 — Staffing</div>
-      <div class="section-break-line"></div>
-    </div>
-
-    <div class="step">
-      <span class="step-num">4</span>
-      <div class="step-body">
-        <p class="step-prompt">Organizations need staffing to be effective, but how many staff depends on your organizing model. Thinking of your current or ideal organization, what is your <strong>member-to-staff ratio?</strong></p>
-        <div class="input-row">
-          <input type="text" id="ratio" class="narrow" value="50" />
-          <span class="unit">members per staff</span>
-        </div>
-        <p class="step-hint">Divide the number of members by the number of staff (members ÷ staff). For example, 100 members ÷ 10 staff = 10 members/staff.</p>
+  <!-- STEP 3 -->
+  <section class="step" id="s3" hidden aria-labelledby="h3s">
+    <span class="step-n" aria-hidden="true">3</span>
+    <h2 id="h3s">Now imagine winning</h2>
+    <p>A movement that governs needs a majority on its side. Pick the place you're organizing to win, and how deeply organized that majority needs to be.</p>
+    <div class="field">
+      <label for="geo">Where are you organizing?</label>
+      <span class="hint" id="geoHint">For a city or county, choose "Somewhere else" and enter its population. A quick search for "[place] population census" will find it.</span>
+      <select id="geo" aria-describedby="geoHint"></select>
+      <div class="custom-inline" id="popCustomWrap" hidden>
+        <label class="vh" for="popCustom">Population</label>
+        <span class="input-wrap"><input type="text" inputmode="numeric" id="popCustom" class="wide" placeholder="850,000" autocomplete="off"><span class="affix">people</span></span>
       </div>
     </div>
+    <fieldset>
+      <legend>How big a majority are you aiming for?</legend>
+      <span class="hint">Most of these people won't be active. They just need to be on your side.</span>
+      <div class="chips">
+        <span class="chip"><input type="radio" name="aligned" id="a51" value="51" checked><label for="a51">51%</label></span>
+        <span class="chip"><input type="radio" name="aligned" id="a60" value="60"><label for="a60">60%</label></span>
+        <span class="chip"><input type="radio" name="aligned" id="a75" value="75"><label for="a75">75%</label></span>
+        <span class="chip"><input type="radio" name="aligned" id="a90" value="90"><label for="a90">90%</label></span>
+        <span class="chip"><input type="radio" name="aligned" id="ac" value="custom"><label for="ac">Other</label></span>
+      </div>
+      <div class="custom-inline" id="alignedCustomWrap" hidden>
+        <label class="vh" for="alignedCustom">Custom majority percentage</label>
+        <span class="input-wrap"><input type="text" inputmode="decimal" id="alignedCustom" placeholder="55" autocomplete="off"><span class="affix">%</span></span>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Of those supporters, how many need to be active members?</legend>
+      <span class="hint">Count committed, participating members, the same way you counted your own. For a sense of scale: at the labor movement's 1954 peak, about 1 in 3 wage and salary workers belonged to a union. Today it's 1 in 10.</span>
+      <div class="chips">
+        <span class="chip tall"><input type="radio" name="share" id="sh3" value="3"><label for="sh3">1 in 3<small>Union peak, 1954</small></label></span>
+        <span class="chip tall"><input type="radio" name="share" id="sh5" value="5"><label for="sh5">1 in 5<small>&nbsp;</small></label></span>
+        <span class="chip tall"><input type="radio" name="share" id="sh10" value="10" checked><label for="sh10">1 in 10<small>Unions today</small></label></span>
+        <span class="chip tall"><input type="radio" name="share" id="sh20" value="20"><label for="sh20">1 in 20<small>&nbsp;</small></label></span>
+        <span class="chip tall"><input type="radio" name="share" id="sh50" value="50"><label for="sh50">1 in 50<small>&nbsp;</small></label></span>
+        <span class="chip tall"><input type="radio" name="share" id="shc" value="custom"><label for="shc">Other<small>&nbsp;</small></label></span>
+      </div>
+      <div class="custom-inline" id="shareCustomWrap" hidden>
+        <label class="vh" for="shareCustom">Custom membership percentage</label>
+        <span class="input-wrap"><input type="text" inputmode="decimal" id="shareCustom" placeholder="15" autocomplete="off"><span class="affix">% of supporters</span></span>
+      </div>
+    </fieldset>
+    <div class="out" id="o3" hidden aria-live="polite"><p class="big" id="o3text"></p></div>
+    <div class="actions">
+      <button class="btn" type="button" data-next="4" id="next3" disabled>See what it would take</button>
+      <span class="req" id="req3">Choose where you're organizing to continue.</span>
+    </div>
+  </section>
 
-    <div class="step">
-      <span class="step-num">5</span>
-      <div class="step-body">
-        <p class="step-prompt">Enter an average <strong>"all-in" cost per staff member</strong> — this usually includes salary, payroll taxes, and fringe benefits.</p>
-        <div class="input-row">
-          <span class="unit">$</span>
-          <input type="text" id="cost_per_staff" class="wide" value="75,000" />
-          <span class="unit">per year</span>
-        </div>
-        <p class="step-hint">$75,000 is a reasonable placeholder if you're unsure.</p>
-        <div class="callout">
-          Based on your membership goal and ratio, you would need <span class="val" id="r-staff">—</span> staff to organize <span class="val" id="r-staff-members">—</span> members. This would cost <span class="val" id="r-staffcost">—</span>.
+  <!-- STEP 4 -->
+  <section class="step" id="s4" hidden aria-labelledby="h4s">
+    <span class="step-n" aria-hidden="true">4</span>
+    <h2 id="h4s">The structural limit</h2>
+    <div id="limitBlock">
+      <h3 class="beat">The bill</h3>
+      <p class="lede" id="o4bill"></p>
+      <div class="bars" id="bars" aria-hidden="true"></div>
+
+      <h3 class="beat">Is there that much money?</h3>
+      <p id="o4money"></p>
+
+      <h3 class="beat">The ceiling</h3>
+      <div class="track" id="track" aria-hidden="true"></div>
+      <p id="o4ceil"></p>
+
+      <p class="small">This isn’t a case against grants. It’s a case for spending them on building models that can eventually pay their own way.</p>
+
+      <details class="more" id="more4">
+        <summary>Show the details</summary>
+        <p id="o4staff"></p>
+        <p id="o4limit"></p>
+        <p id="o4nat"></p>
+        <div class="chart-wrap" id="chartWrap"></div>
+        <p class="chart-cap">The pink line is the outside money needed each year (up the side) at each membership size (along the bottom). Both scales grow by ten times at each gridline, so a straight line means the money needed grows exactly as fast as membership.</p>
+      </details>
+    </div>
+    <p class="lede" id="o4surplus" hidden></p>
+    <div class="actions"><button class="btn" type="button" data-next="5" id="next4">What would it take?</button></div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step" id="s5" hidden aria-labelledby="h5s">
+    <span class="step-n" aria-hidden="true">5</span>
+    <h2 id="h5s">What would it take?</h2>
+    <p id="o5intro"></p>
+    <div class="slider">
+      <div class="slider-head"><label for="wiRatio">Members per paid organizer</label><output for="wiRatio" id="wiRatioOut"></output></div>
+      <input type="range" id="wiRatio" min="1" max="500" step="1">
+      <p class="small" id="beRatioText"></p>
+    </div>
+    <div class="slider">
+      <div class="slider-head"><label for="wiDues" id="wiDuesLabel">Dues, % of household income</label><output for="wiDues" id="wiDuesOut"></output></div>
+      <input type="range" id="wiDues" min="0" max="10" step="0.1">
+      <p class="small" id="beDuesText"></p>
+    </div>
+    <div class="out" aria-live="polite">
+      <div class="pm" aria-hidden="true">
+        <div class="pm-bar"><span class="dues" id="wiPmDues"></span><span class="gap" id="wiPmGap"></span></div>
+        <div class="pm-legend">
+          <span class="k-dues">Dues per member <b id="wiPmDuesV"></b></span>
+          <span class="k-gap" id="wiPmGapLabel">Gap per member <b id="wiPmGapV"></b></span>
         </div>
       </div>
+      <p id="o5result"></p>
     </div>
+    <div class="actions"><button class="btn ghost" type="button" id="wiReset">Reset to my numbers</button></div>
 
-    <div class="section-break">
-      <div class="section-break-label">Part 3 — Revenue</div>
-      <div class="section-break-line"></div>
-    </div>
-
-    <div class="step">
-      <span class="step-num">6</span>
-      <div class="step-body">
-        <p class="step-prompt">Would your members pay dues? If yes, <strong>what % of their income</strong> would you want them to contribute?</p>
-        <div class="input-row">
-          <input type="number" id="dues_rate" class="narrow" value="0.5" min="0" max="100" step="0.1" />
-          <span class="unit">% of income</span>
-        </div>
-        <p class="step-hint">Enter 0% if no dues.</p>
+    <div style="margin-top:48px">
+      <p class="closing">Foundation money can buy time to build. It can't be the engine of a majority movement, because the bill grows with every person you win. The models that scale are the ones where members carry the work and the cost.</p>
+      <p>Read the argument behind this calculator: <a href="https://stairstothemoon.substack.com/p/learning-to-win-with-what-you-have">Learning to win with what you have</a>.</p>
+      <div class="actions">
+        <button class="btn" type="button" id="share">Copy link to this scenario</button>
+        <button class="btn ghost" type="button" id="reset">Start over</button>
+        <span class="req" id="shareMsg" role="status"></span>
       </div>
     </div>
+  </section>
 
-    <div class="step">
-      <span class="step-num">7</span>
-      <div class="step-body">
-        <p class="step-prompt">What do you estimate is the <strong>average annual family income</strong> for your members?</p>
-        <div class="input-row">
-          <span class="unit">$</span>
-          <input type="text" id="member_income" class="wide" value="60,000" />
-          <span class="unit">per year</span>
-        </div>
-        <div class="callout">
-          Your average member's dues would be <span class="val" id="r-dpm">—</span> per year, generating <span class="val" id="r-revenue">—</span> annually in dues income.
-        </div>
-      </div>
+  <details id="sources">
+    <summary>Sources and assumptions</summary>
+    <ul>
+      <li>Household income: U.S. Census Bureau, <i>Income in the United States: 2025</i> (P60-289, September 2026). U.S. median $87,460; 10th percentile $20,010. Medians by race and Hispanic origin from the same report. "Lower-income" is two-thirds of the U.S. median, a common cutoff (used, for example, by Pew Research Center).</li>
+      <li>State medians: Census Bureau Current Population Survey, 2025, via FRED (Federal Reserve Bank of St. Louis). Single-year state estimates are noisy; treat them as approximate.</li>
+      <li>Population: Census Bureau Vintage 2025 estimates (July 1, 2025). U.S. total 341,784,857. Average congressional district: 761,169 people, from the 2020 apportionment.</li>
+      <li>Unions: Bureau of Labor Statistics, <i>Union Members, 2025</i> (10.0% of wage and salary workers). 1954 peak: about 35% of wage and salary workers (28.3% of all employed workers, per Congressional Research Service report RL32553).</li>
+      <li>Dues benchmarks: union dues commonly run about 1 to 2% of pay; a traditional tithe is 10%.</li>
+      <li>Democracy philanthropy: $6.7 billion in 2025, per the U.S. Democracy Hub as reported by the <i>Chronicle of Philanthropy</i>. This covers all democracy and civic work (voting, journalism, litigation, research, bridge-building, organizing) from funders across the political spectrum, so it overstates what's available for organizing.</li>
+      <li>All U.S. foundation giving: $117.15 billion in 2025, per <i>Giving USA 2026</i>.</li>
+      <li>"Your share" of democracy philanthropy divides the national total by population. Real funding isn't distributed evenly.</li>
+      <li>"What you raise today" assumes your current gap (staff cost minus dues) is covered by grants and donors. If you have other revenue, such as events or earned income, your outside funding is smaller. The model counts staff costs only, not rent, travel, or other expenses, so real gaps are larger.</li>
+    </ul>
+  </details>
+</main>
+
+<aside class="ledger" aria-label="Running totals">
+  <div class="ledger-inner">
+    <h3>Per member, per year</h3>
+    <p class="empty" id="lgEmpty">Your numbers will appear here as you go.</p>
+    <dl id="lgPer" hidden>
+      <dt>Staffing cost</dt><dd id="lgCost"></dd>
+      <dt class="lg2">Dues</dt><dd class="lg2" id="lgDues" style="color:var(--green)"></dd>
+      <dt class="lg2" id="lgGapK">Gap</dt><dd class="lg2" id="lgGap" style="color:var(--plum)"></dd>
+    </dl>
+    <div id="lgScale" hidden>
+      <hr>
+      <h3>At your majority goal</h3>
+      <dl>
+        <dt>Members</dt><dd id="lgMembers"></dd>
+        <dt>Staff</dt><dd id="lgStaff"></dd>
+        <dt id="lgOutK">Outside money / yr</dt><dd id="lgOut" style="color:var(--plum)"></dd>
+      </dl>
     </div>
-
   </div>
+</aside>
+</div>
 
-  <aside class="results-rail">
-
-    <p class="rail-title">Live results</p>
-
-    <div class="result-row">
-      <p class="rlabel">Membership target</p>
-      <p class="rvalue" id="rr-members">—</p>
-      <p class="rformula">Pop × Aligned% × Member%</p>
-    </div>
-
-    <div class="result-row">
-      <p class="rlabel">Staff target</p>
-      <p class="rvalue" id="rr-staff">—</p>
-      <p class="rformula">Members ÷ Ratio</p>
-    </div>
-
-    <div class="result-row">
-      <p class="rlabel">Dues per member</p>
-      <p class="rvalue" id="rr-dpm">—</p>
-      <p class="rformula">Dues rate × Member income</p>
-    </div>
-
-    <div class="result-row">
-      <p class="rlabel">Staff cost</p>
-      <p class="rvalue" id="rr-staffcost">—</p>
-      <p class="rformula">Staff × Cost per staff</p>
-    </div>
-
-    <div class="result-row">
-      <p class="rlabel">Membership revenue</p>
-      <p class="rvalue" id="rr-revenue">—</p>
-      <p class="rformula">Members × Dues per member</p>
-    </div>
-
-    <div class="income-card" id="income-card">
-      <p class="rlabel">Operating income</p>
-      <p class="rvalue" id="rr-income">—</p>
-      <p class="rdesc" id="rr-desc">Revenue − Staff cost</p>
-    </div>
-
-  </aside>
-
+<div class="bar" id="bar" hidden aria-hidden="true">
+  <div><span id="barCostK">Staffing cost per member</span><b id="barCost"></b></div>
+  <div class="g lg2"><span>Dues / member</span><b id="barDues"></b></div>
+  <div class="p lg2"><span id="barGapK">Gap / member</span><b id="barGap"></b></div>
 </div>
 
 <script>
-function parseC(s){ return parseFloat(String(s).replace(/,/g,''))||0; }
-function fmtN(n){ return Math.round(n).toLocaleString('en-US'); }
-function fmtD(n){
-  const a=Math.abs(n), s=n<0?'-':'';
-  if(a>=1e9) return s+'$'+(a/1e9).toFixed(2)+'B';
-  if(a>=1e6) return s+'$'+(a/1e6).toFixed(2)+'M';
-  if(a>=1e3) return s+'$'+(a/1e3).toFixed(1)+'K';
-  return s+'$'+Math.round(a).toLocaleString();
-}
+(function () {
+  "use strict";
 
-function attachComma(id){
-  const el=document.getElementById(id);
-  if(!el||el.type!=='text') return;
-  el.addEventListener('focus',function(){ this.value=this.value.replace(/,/g,''); });
-  el.addEventListener('blur',function(){
-    const n=parseFloat(this.value.replace(/,/g,''));
-    if(!isNaN(n)) this.value=fmtN(n);
-    calc();
-  });
-  el.addEventListener('input', calc);
-}
-['population','ratio','cost_per_staff','member_income'].forEach(attachComma);
+  /* ---------------- data ---------------- */
+  var US_POP = 341784857;
+  var CD_POP = 761169;
+  var DEM_TOTAL = 6.7e9;
+  var FOUND_TOTAL = 117.15e9;
+  var US_MEDIAN = 87460;
 
-function selectPreset(val, btn){
-  document.getElementById('aligned').value=val;
-  document.querySelectorAll('#aligned-presets .preset-btn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  calc();
-}
+  var INCOMES = [
+    { group: "U.S. households", items: [
+      ["p10", "Lowest-income households, $20,010", 20010],
+      ["lower", "Lower-income households, $58,300", 58300],
+      ["median", "Typical U.S. household, $87,460", 87460]
+    ]},
+    { group: "Median by community", items: [
+      ["black", "Black households, $59,980", 59980],
+      ["hispanic", "Hispanic households, $73,260", 73260],
+      ["white", "White households, $91,930", 91930],
+      ["asian", "Asian households, $126,300", 126300]
+    ]}
+  ];
 
-document.getElementById('aligned').addEventListener('input',function(){
-  document.querySelectorAll('#aligned-presets .preset-btn').forEach(b=>b.classList.remove('on'));
-  calc();
-});
-['membership_pct','dues_rate'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+  // [name, population July 2025, median household income 2025 (CPS)]
+  var STATES = [
+    ["Alabama",5193088,68410],["Alaska",737270,102500],["Arizona",7623818,86570],["Arkansas",3114791,68060],
+    ["California",39355309,100800],["Colorado",6012561,102500],["Connecticut",3688496,101400],["Delaware",1059952,99800],
+    ["District of Columbia",693645,107600],["Florida",23462518,77920],["Georgia",11302748,82100],["Hawaii",1432820,105100],
+    ["Idaho",2029733,87840],["Illinois",12719141,93270],["Indiana",6973333,76180],["Iowa",3238387,81890],
+    ["Kansas",2977220,85540],["Kentucky",4606864,73750],["Louisiana",4618189,60670],["Maine",1414874,95150],
+    ["Maryland",6265347,116300],["Massachusetts",7154084,118500],["Michigan",10127884,76800],["Minnesota",5830405,95160],
+    ["Mississippi",2954160,57840],["Missouri",6270541,84700],["Montana",1144694,86770],["Nebraska",2018006,100600],
+    ["Nevada",3282188,88880],["New Hampshire",1415342,112100],["New Jersey",9548215,111400],["New Mexico",2125498,67620],
+    ["New York",20002427,86900],["North Carolina",11197968,80250],["North Dakota",799358,85060],["Ohio",11900510,85150],
+    ["Oklahoma",4123288,75390],["Oregon",4273586,92740],["Pennsylvania",13059432,85880],["Rhode Island",1114521,96880],
+    ["South Carolina",5570274,82320],["South Dakota",935094,82460],["Tennessee",7315076,75250],["Texas",31709821,85060],
+    ["Utah",3538904,102900],["Vermont",644663,95290],["Virginia",8880107,100000],["Washington",8001020,112600],
+    ["West Virginia",1766147,61770],["Wisconsin",5972787,88020],["Wyoming",588753,81030]
+  ];
 
-function calc(){
-  const pop   = parseC(document.getElementById('population').value);
-  const al    = (parseFloat(document.getElementById('aligned').value)||0)/100;
-  const mp    = (parseFloat(document.getElementById('membership_pct').value)||0)/100;
-  const ratio = parseC(document.getElementById('ratio').value)||1;
-  const cps   = parseC(document.getElementById('cost_per_staff').value);
-  const dr    = (parseFloat(document.getElementById('dues_rate').value)||0)/100;
-  const mi    = parseC(document.getElementById('member_income').value);
-
-  const aligned   = pop*al;
-  const members   = aligned*mp;
-  const staff     = members/ratio;
-  const dpm       = dr*mi;
-  const staffCost = staff*cps;
-  const revenue   = members*dpm;
-  const income    = revenue-staffCost;
-
-  document.getElementById('r-aligned').textContent       = fmtN(aligned);
-  document.getElementById('r-members').textContent       = fmtN(members);
-  document.getElementById('r-staff').textContent         = fmtN(staff);
-  document.getElementById('r-staff-members').textContent = fmtN(members);
-  document.getElementById('r-staffcost').textContent     = fmtD(staffCost);
-  document.getElementById('r-dpm').textContent           = fmtD(dpm);
-  document.getElementById('r-revenue').textContent       = fmtD(revenue);
-
-  document.getElementById('rr-members').textContent   = fmtN(members);
-  document.getElementById('rr-staff').textContent     = fmtN(staff);
-  document.getElementById('rr-dpm').textContent       = fmtD(dpm);
-  document.getElementById('rr-staffcost').textContent = fmtD(staffCost);
-  document.getElementById('rr-revenue').textContent   = fmtD(revenue);
-  document.getElementById('rr-income').textContent    = fmtD(income);
-
-  const card = document.getElementById('income-card');
-  const desc = document.getElementById('rr-desc');
-  if(income>=0){
-    card.className='income-card pos';
-    desc.textContent='Net income of '+fmtD(income)+' annually above staffing — available for other organizational costs.';
-  } else {
-    card.className='income-card neg';
-    desc.textContent='A gap of '+fmtD(Math.abs(income))+' annually remains to cover staffing at this scale.';
+  /* ---------------- helpers ---------------- */
+  var $ = function (id) { return document.getElementById(id); };
+  function parseNum(s) {
+    if (s == null) return NaN;
+    var t = String(s).replace(/[^0-9.]/g, "");
+    if (t === "" || t === ".") return NaN;
+    return parseFloat(t);
   }
-}
+  function sig(n, d) { if (!isFinite(n) || n === 0) return n; return Number(Number(n).toPrecision(d)); }
+  function commas(n) { return Math.round(n).toLocaleString("en-US"); }
+  function money(n) {
+    if (!isFinite(n)) return "\u2014";
+    var a = Math.abs(n), s = n < 0 ? "-" : "";
+    if (a < 10000) return s + "$" + commas(a);
+    if (a < 1e6) return s + "$" + commas(sig(a, 3));
+    if (a < 1e9) return s + "$" + trim(sig(a / 1e6, 3)) + " million";
+    return s + "$" + trim(sig(a / 1e9, 3)) + " billion";
+  }
+  function moneyShort(n) {
+    if (!isFinite(n)) return "\u2014";
+    var a = Math.abs(n), s = n < 0 ? "-" : "";
+    if (a < 10000) return s + "$" + commas(a);
+    if (a < 1e6) return s + "$" + trim(sig(a / 1e3, 3)) + "K";
+    if (a < 1e9) return s + "$" + trim(sig(a / 1e6, 3)) + "M";
+    if (a < 1e12) return s + "$" + trim(sig(a / 1e9, 3)) + "B";
+    return s + "$" + trim(sig(a / 1e12, 3)) + "T";
+  }
+  function people(n) {
+    if (!isFinite(n)) return "\u2014";
+    if (n < 1000) return commas(n);
+    if (n < 1e6) return commas(sig(n, n < 10000 ? 2 : 3));
+    if (n < 1e9) return trim(sig(n / 1e6, 3)) + " million";
+    return trim(sig(n / 1e9, 3)) + " billion";
+  }
+  function peopleShort(n) {
+    if (!isFinite(n)) return "\u2014";
+    if (n < 1000) return commas(n);
+    if (n < 1e6) return trim(sig(n / 1e3, 3)) + "K";
+    return trim(sig(n / 1e6, 3)) + "M";
+  }
+  function times(n) {
+    if (!isFinite(n)) return "\u2014";
+    if (n < 10) return trim(Math.round(n * 10) / 10);
+    return commas(sig(n, n < 1000 ? 2 : 3));
+  }
+  function pct(n) { return trim(Math.round(n * 10) / 10) + "%"; }
+  function trim(n) { var s = String(n); return s.indexOf(".") > -1 ? s.replace(/\.?0+$/, "") : s; }
+  function N(v, cls) { return '<span class="num' + (cls ? " " + cls : "") + '">' + v + "</span>"; }
+  function radioVal(name) { var r = document.querySelector('input[name="' + name + '"]:checked'); return r ? r.value : null; }
+  function setRadio(name, val) {
+    var r = document.querySelector('input[name="' + name + '"][value="' + val + '"]');
+    if (r) { r.checked = true; return true; } return false;
+  }
 
-calc();
+  /* ---------------- build selects ---------------- */
+  (function buildSelects() {
+    var inc = $("income"), html = "";
+    INCOMES.forEach(function (g) {
+      html += '<optgroup label="' + g.group + '">';
+      g.items.forEach(function (it) { html += '<option value="' + it[0] + '">' + it[1] + "</option>"; });
+      html += "</optgroup>";
+    });
+    html += '<optgroup label="Median by state">';
+    STATES.forEach(function (s, i) { html += '<option value="st' + i + '">' + s[0] + ", $" + commas(s[2]) + "</option>"; });
+    html += '</optgroup><option value="custom">Enter my own number</option>';
+    inc.innerHTML = html;
+    inc.value = "lower";
+
+    var geo = $("geo");
+    var g = '<option value="">Choose a place</option><optgroup label="Common sizes">' +
+      '<option value="cd">A congressional district, about 761,000 people</option>' +
+      '<option value="us">The United States, about 342 million people</option></optgroup><optgroup label="States">';
+    STATES.forEach(function (s, i) { g += '<option value="st' + i + '">' + s[0] + ", " + people(s[1]) + "</option>"; });
+    g += '</optgroup><option value="custom">Somewhere else (enter a population)</option>';
+    geo.innerHTML = g;
+  })();
+
+  /* ---------------- read inputs ---------------- */
+  function read() {
+    var s = {};
+    s.members = parseNum($("members").value);
+    s.staff = parseNum($("staff").value);
+    s.cps = parseNum($("cps").value);
+    var dv = radioVal("dues");
+    s.flat = dv === "custom" && radioVal("duesMode") === "flat";
+    s.duesRate = dv === "custom" ? parseNum($("duesCustom").value) : parseFloat(dv);
+    if (s.flat) { s.duesFlat = s.duesRate; s.duesRate = NaN; }
+    var ik = $("income").value;
+    if (ik === "custom") s.income = parseNum($("incomeCustom").value);
+    else if (ik.indexOf("st") === 0) s.income = STATES[+ik.slice(2)][2];
+    else INCOMES.forEach(function (g) { g.items.forEach(function (it) { if (it[0] === ik) s.income = it[2]; }); });
+    var gk = $("geo").value;
+    s.geoKey = gk;
+    if (gk === "cd") { s.pop = CD_POP; s.geoName = "a typical congressional district"; s.geoPoss = "A typical district's"; }
+    else if (gk === "us") { s.pop = US_POP; s.geoName = "the United States"; s.geoPoss = "The country's"; }
+    else if (gk.indexOf("st") === 0) { var st = STATES[+gk.slice(2)]; s.pop = st[1]; s.geoName = st[0]; s.geoPoss = st[0] + "\u2019s"; }
+    else if (gk === "custom") { s.pop = parseNum($("popCustom").value); s.geoName = "your area"; s.geoPoss = "Your area\u2019s"; }
+    else s.pop = NaN;
+    var av = radioVal("aligned");
+    s.aligned = av === "custom" ? parseNum($("alignedCustom").value) : parseFloat(av);
+    var sv = radioVal("share");
+    s.sharePct = sv === "custom" ? parseNum($("shareCustom").value) : 100 / parseFloat(sv);
+    s.shareLabel = sv === "custom" ? pct(s.sharePct) + " of supporters" : "1 in " + sv;
+    return s;
+  }
+
+  /* ---------------- compute ---------------- */
+  function compute(s) {
+    var c = {};
+    c.ok1 = s.members >= 1 && s.staff >= 0 && isFinite(s.staff) && s.cps >= 0;
+    if (!c.ok1) return c;
+    c.ratio = s.staff > 0 ? s.members / s.staff : Infinity;
+    c.costPer = s.staff > 0 ? s.cps * s.staff / s.members : 0;
+    c.ok2 = s.flat ? (isFinite(s.duesFlat) && s.duesFlat >= 0) : (isFinite(s.duesRate) && s.duesRate >= 0 && s.income > 0);
+    if (!c.ok2) return c;
+    c.duesPer = s.flat ? s.duesFlat : s.duesRate / 100 * s.income;
+    c.gap = c.costPer - c.duesPer;
+    c.subsidyNow = Math.max(c.gap, 0) * s.members;
+    c.beRatio = c.duesPer > 0 ? s.cps / c.duesPer : Infinity;
+    c.beRate = s.flat ? NaN : c.costPer / s.income * 100;
+    c.ok3 = s.pop > 0 && s.aligned > 0 && s.aligned <= 100 && s.sharePct > 0 && s.sharePct <= 100;
+    if (!c.ok3) return c;
+    c.alignedPeople = s.pop * s.aligned / 100;
+    c.goal = c.alignedPeople * s.sharePct / 100;
+    c.mult = c.goal / s.members;
+    c.staffNeeded = s.staff > 0 ? c.goal / c.ratio : 0;
+    c.staffCost = c.staffNeeded * s.cps;
+    c.duesRev = c.goal * c.duesPer;
+    c.fundGap = c.staffCost - c.duesRev;
+    c.fairShare = DEM_TOTAL * Math.min(s.pop / US_POP, 1);
+    c.natGoal = US_POP * s.aligned / 100 * s.sharePct / 100;
+    if (c.gap > 0) {
+      c.natCeil = DEM_TOTAL / c.gap;
+      c.ceil2 = c.subsidyNow * 2 / c.gap;
+      c.ceil10 = c.subsidyNow * 10 / c.gap;
+    }
+    return c;
+  }
+
+  /* ---------------- render ---------------- */
+  var reached = 0;
+  var wi = { ratio: null, dues: null };
+  var S, C;
+
+  function setBar(duesEl, gapEl, duesPer, costPer) {
+    var total = Math.max(duesPer, costPer, 1);
+    var d = Math.min(duesPer, costPer) / total * 100;
+    var g = Math.max(costPer - duesPer, 0) / total * 100;
+    if (duesPer >= costPer) { d = 100; g = 0; }
+    $(duesEl).style.width = d + "%";
+    $(gapEl).style.width = g + "%";
+  }
+
+  function render() {
+    S = read(); C = compute(S);
+
+    // step 1
+    $("next1").disabled = !C.ok1;
+    $("req1").hidden = !!C.ok1;
+    $("o1").hidden = !C.ok1;
+    if (C.ok1) {
+      $("o1text").innerHTML = S.staff > 0
+        ? "That\u2019s about 1 organizer for every " + N(people(C.ratio)) + " members. At " + N(money(S.cps)) +
+          " per staff member, your model spends about " + N(money(C.costPer)) + " per member each year on staffing."
+        : "With no paid staff, your staffing cost per member is " + N("$0") + ". Members already carry the work.";
+    }
+
+    // step 2
+    if (C.ok1 && C.ok2) {
+      setBar("pmDues", "pmGap", C.duesPer, C.costPer);
+      $("pmDuesV").textContent = money(C.duesPer);
+      if (C.gap > 0) {
+        $("pmGapLabel").innerHTML = 'Gap per member <b id="pmGapV">' + money(C.gap) + "</b>";
+        $("o2text").innerHTML =
+          "<p>Each member contributes " + N(money(C.duesPer), "green") + " a year. That leaves a gap of " + N(money(C.gap), "plum") +
+          " per member, which today is covered by about " + N(money(C.subsidyNow)) + " a year from grants and donors.</p>" +
+          "<p><strong>Key takeaway:</strong> Unless the staffing model changes with scale, that gap doesn\u2019t shrink as you grow. Every new member you organize adds another " +
+          N(money(C.gap), "plum") + " a year that someone outside your membership has to cover.</p>";
+      } else {
+        $("pmGapLabel").innerHTML = 'Staffing cost <b id="pmGapV">' + money(C.costPer) + "</b>";
+        $("o2text").innerHTML =
+          "<p>Each member contributes " + N(money(C.duesPer), "green") + " a year, at least as much as the " + N(money(C.costPer)) +
+          " it costs to staff them. Every new member adds about " + N(money(-C.gap), "green") +
+          " a year, so this model can fund its own growth.</p>";
+      }
+    }
+
+    // step 3
+    var ok3 = C.ok1 && C.ok2 && C.ok3;
+    $("next3").disabled = !ok3;
+    $("req3").hidden = ok3;
+    $("o3").hidden = !ok3;
+    if (ok3) {
+      var multTxt = C.mult >= 1.05
+        ? ", about " + N(times(C.mult)) + " times your current size."
+        : ". You\u2019re already at or above that size.";
+      $("o3text").innerHTML = "In " + S.geoName + ", a " + pct(S.aligned) + " majority is " + N(people(C.alignedPeople)) +
+        " people. At " + S.shareLabel + ", you\u2019d need about " + N(people(C.goal)) + " members" + multTxt;
+    }
+
+    // step 4
+    if (ok3) render4();
+
+    // step 5
+    if (C.ok1 && C.ok2) render5();
+
+    renderLedger(ok3);
+  }
+
+  function render4() {
+    var isUS = S.geoKey === "us";
+    if (!(C.gap > 0)) {
+      $("limitBlock").hidden = true;
+      $("o4surplus").hidden = false;
+      $("o4surplus").innerHTML = "At that scale, members would contribute " + N(money(C.duesRev), "green") + " against " + N(money(C.staffCost)) +
+        " in staffing costs, a surplus of " + N(money(-C.fundGap), "green") + " a year. Because each member pays their own way, this model has no funding ceiling: growth pays for itself.";
+      return;
+    }
+    $("limitBlock").hidden = false;
+    $("o4surplus").hidden = true;
+
+    // Beat 1: the bill
+    $("o4bill").innerHTML = "To reach " + N(people(C.goal)) + " members, your model would need " + N(money(C.fundGap), "plum") +
+      " a year from outside. You raise about " + N(money(C.subsidyNow)) + " today.";
+
+    // Bars (linear scale)
+    var shareLabel = isUS ? "All U.S. democracy philanthropy" : S.geoPoss + " share of all U.S. democracy philanthropy";
+    var rows = [
+      ["now", "What you raise today", C.subsidyNow],
+      ["share", shareLabel, C.fairShare],
+      ["bill", "What your majority goal needs", C.fundGap]
+    ];
+    var max = Math.max(C.fundGap, C.fairShare, C.subsidyNow);
+    $("bars").innerHTML = rows.map(function (r) {
+      return '<div class="brow ' + r[0] + '"><div class="bl"><span>' + r[1] + "</span><b>" + money(r[2]) + "</b></div>" +
+        '<div class="bt"><div class="bf" style="width:' + (r[2] / max * 100) + '%"></div></div></div>';
+    }).join("");
+
+    // Beat 2: is there that much money?
+    var cover = C.fairShare / C.fundGap;
+    var lead = isUS
+      ? "Even if every dollar of U.S. democracy philanthropy went to this one purpose, it would "
+      : "Even if " + S.geoName + " received its full share of all U.S. democracy philanthropy, it would ";
+    $("o4money").innerHTML = lead + (cover < 1
+      ? "cover " + N(coverText(cover)) + " of the bill."
+      : "cover the bill, but only by using " + N(Math.round(100 / cover) + "%") + " of that money for this alone, every year.") +
+      ' <span class="small">That philanthropy totaled $6.7 billion nationally in 2025, and it also pays for voting rights, journalism, litigation, and research.</span>';
+
+    // Beat 3: the ceiling (linear track from 0 to goal)
+    var ceil = C.fairShare / C.gap;
+    var reaches = ceil >= C.goal;
+    var fPct = Math.min(ceil / C.goal, 1) * 100;
+    var nowPct = Math.min(S.members / C.goal, 1) * 100;
+    var trackW = $("track").clientWidth || 600;
+    var tooClose = !reaches && Math.abs(fPct - nowPct) / 100 * trackW < 150;
+    function mk(pctPos, text, lift) {
+      var cls = pctPos < 14 ? " l" : (pctPos > 86 ? " r" : "");
+      return '<span class="mk' + cls + (lift ? " lift" : "") + '" style="left:' + pctPos + '%">' + text + "</span>";
+    }
+    var markers = mk(nowPct, "You today", false) + (reaches ? "" : mk(fPct, "Money runs out", tooClose));
+    $("track").innerHTML =
+      '<div class="mks">' + markers + "</div>" +
+      '<div class="rail"><div class="funded" style="width:' + fPct + '%"></div></div>' +
+      '<div class="ends"><span>0 members</span><span>Your goal: ' + people(C.goal) + "</span></div>" +
+      '<div class="key"><span><i style="background:var(--slate)"></i>Fundable with ' + (isUS ? "every democracy dollar" : "your area\u2019s full share") + "</span>" +
+      (reaches ? "" : '<span><i style="background:var(--plum)"></i>No money to pay for it</span>') + "</div>";
+    $("track").style.marginTop = tooClose ? "62px" : "40px";
+
+    $("o4ceil").innerHTML = reaches
+      ? "With " + (isUS ? "every democracy dollar in the country" : "that full share") + ", this model could just reach your goal, but only if nothing else in " +
+        (isUS ? "the country" : S.geoName) + " received a dollar of democracy funding."
+      : "With " + (isUS ? "every democracy dollar in the country" : "that full share") + ", this model tops out at about " + N(people(ceil)) + " members. Every member past that point needs money that doesn\u2019t exist.";
+
+    // Details
+    $("o4staff").innerHTML = "At majority scale, your current model would need about " + N(people(C.staffNeeded)) + " staff costing " +
+      N(money(C.staffCost)) + " a year. Members would contribute " + N(money(C.duesRev), "green") + ", leaving " + N(money(C.fundGap), "plum") +
+      " to raise from outside" + (C.mult > 1.05 ? ", " + N(times(C.mult)) + " times what you raise today." : ".");
+    $("o4limit").innerHTML = "Because each member costs more than they contribute, outside money has to grow in step with membership. For example, if you double your current funding, this model tops out around " +
+      N(people(C.ceil2)) + " members. At ten times, around " + N(people(C.ceil10)) + ".";
+    var natCover = C.natCeil / C.natGoal;
+    $("o4nat").innerHTML = "Zooming out to the whole country: if every democracy dollar went to organizations built like yours, they could support about " + N(people(C.natCeil)) +
+      " members nationwide, against about " + N(people(C.natGoal)) + " needed for a national majority at your settings" +
+      (natCover < 1 ? " (" + N(coverText(natCover)) + " of what\u2019s needed)." : ".") +
+      " For scale, all U.S. foundation giving, for every cause, was $117 billion in 2025.";
+    if ($("more4").open) drawChart();
+  }
+
+  function coverText(f) {
+    if (f >= 0.995) return "all";
+    if (f < 0.1) return pct(f * 100);
+    if (Math.abs(f - 1 / 3) < 0.025) return "about a third";
+    if (Math.abs(f - 0.5) < 0.025) return "about half";
+    if (Math.abs(f - 0.25) < 0.02) return "about a quarter";
+    return Math.round(f * 100) + "%";
+  }
+
+  function render5() {
+    var slR = $("wiRatio"), slD = $("wiDues");
+    var baseRatio = isFinite(C.ratio) ? C.ratio : 500;
+    var maxR = Math.min(5000, Math.max(500, Math.ceil((isFinite(C.beRatio) ? C.beRatio : 0) * 1.4), Math.ceil(baseRatio * 1.4)));
+    slR.max = maxR;
+    if (wi.ratio == null) wi.ratio = Math.round(baseRatio);
+    if (wi.dues == null) wi.dues = S.flat ? S.duesFlat : S.duesRate;
+    slR.value = Math.min(wi.ratio, maxR);
+    if (S.flat) {
+      slD.step = 10;
+      slD.max = Math.max(1000, Math.ceil(Math.max(C.costPer, S.duesFlat) * 1.3 / 100) * 100);
+      $("wiDuesLabel").textContent = "Dues per member, per year";
+      $("wiDuesOut").textContent = money(wi.dues);
+    } else {
+      slD.step = 0.1;
+      slD.max = Math.max(10, Math.ceil(C.beRate * 1.2));
+      $("wiDuesLabel").textContent = "Dues, % of household income";
+      $("wiDuesOut").textContent = trim(Math.round(wi.dues * 10) / 10) + "%";
+    }
+    slD.value = wi.dues;
+    $("wiRatioOut").textContent = commas(wi.ratio) + " : 1";
+
+    var cost = S.cps / Math.max(wi.ratio, 1);
+    var dues = S.flat ? wi.dues : wi.dues / 100 * S.income;
+    var gap = cost - dues;
+    setBar("wiPmDues", "wiPmGap", dues, cost);
+    $("wiPmDuesV").textContent = money(dues);
+    $("wiPmGapLabel").innerHTML = gap > 0 ? 'Gap per member <b>' + money(gap) + "</b>" : 'Staffing cost <b>' + money(cost) + "</b>";
+
+    if (C.gap > 0) {
+      $("o5intro").innerHTML = "To scale without a ceiling, the per-member gap has to close. There are two ways to do that without cutting anyone\u2019s pay: more members per paid organizer, or more of the cost carried by members themselves. Drag the sliders to try both.";
+    } else {
+      $("o5intro").innerHTML = "Your model already pays for itself. Use the sliders to see how much room you have before a gap opens up.";
+    }
+    $("beRatioText").innerHTML = isFinite(C.beRatio)
+      ? "At " + (S.flat ? money(S.duesFlat) + " a year in dues" : trim(S.duesRate) + "% dues") + ", you\u2019d break even with 1 organizer for every " + N(commas(Math.ceil(C.beRatio))) +
+        " members. A ratio like that is only possible if members, not staff, do most of the organizing. " +
+        '<button class="linkish" type="button" id="setBeR">Try it</button>'
+      : "With no dues, there is no staffing ratio that breaks even.";
+    $("beDuesText").innerHTML = (S.staff > 0)
+      ? "At your current ratio, " + (S.flat
+          ? "each member would need to pay about " + N(money(Math.ceil(C.costPer / 10) * 10)) + " a year. "
+          : "members would need to contribute about " + N(trim(Math.round(C.beRate * 10) / 10) + "%") + " of household income. ") +
+        '<button class="linkish" type="button" id="setBeD">Try it</button>'
+      : "";
+    var bR = $("setBeR"); if (bR) bR.onclick = function () { wi.ratio = Math.ceil(C.beRatio); wi.dues = S.flat ? S.duesFlat : S.duesRate; render(); };
+    var bD = $("setBeD"); if (bD) bD.onclick = function () { wi.ratio = Math.round(baseRatio); wi.dues = S.flat ? Math.ceil(C.costPer / 10) * 10 : Math.ceil(C.beRate * 10) / 10; render(); };
+
+    var out = "";
+    if (C.ok3) {
+      var totalGap = gap * C.goal;
+      out = gap > 0
+        ? "With these settings, reaching " + N(people(C.goal)) + " members would still need " + N(money(totalGap), "plum") + " a year from outside."
+        : "With these settings, reaching " + N(people(C.goal)) + " members would generate a surplus of " + N(money(-totalGap), "green") + " a year. Growth would fund itself.";
+    } else {
+      out = gap > 0 ? "Each member would still cost " + N(money(gap), "plum") + " more than they contribute." : "Each member would pay their own way.";
+    }
+    $("o5result").innerHTML = out;
+  }
+
+  function renderLedger(ok3) {
+    var has1 = C.ok1 && reached >= 1;
+    var has2 = has1 && C.ok2 && reached >= 2;
+    $("lgEmpty").hidden = has1;
+    $("lgPer").hidden = !has1;
+    $("bar").hidden = !has1;
+    Array.prototype.forEach.call(document.querySelectorAll(".lg2"), function (el) { el.hidden = !has2; });
+    if (has1) {
+      $("lgCost").textContent = money(C.costPer);
+      $("barCost").textContent = money(C.costPer);
+      $("barCostK").textContent = has2 ? "Cost / member" : "Staffing cost per member";
+    }
+    if (has2) {
+      $("lgDues").textContent = money(C.duesPer);
+      $("lgGapK").textContent = C.gap > 0 ? "Gap" : "Surplus";
+      $("lgGap").textContent = money(Math.abs(C.gap));
+      $("lgGap").style.color = C.gap > 0 ? "var(--plum)" : "var(--green)";
+      $("barDues").textContent = money(C.duesPer);
+      $("barGapK").textContent = C.gap > 0 ? "Gap / member" : "Surplus / member";
+      $("barGap").textContent = money(Math.abs(C.gap));
+    }
+    var sc = ok3 && reached >= 4;
+    $("lgScale").hidden = !sc;
+    if (sc) {
+      $("lgMembers").textContent = people(C.goal);
+      $("lgStaff").textContent = people(C.staffNeeded);
+      $("lgOutK").textContent = C.fundGap > 0 ? "Outside money / yr" : "Surplus / yr";
+      $("lgOut").textContent = money(Math.abs(C.fundGap));
+      $("lgOut").style.color = C.fundGap > 0 ? "var(--plum)" : "var(--green)";
+    }
+  }
+
+  /* ---------------- chart ---------------- */
+  function drawChart() {
+    var wrap = $("chartWrap");
+    var W = Math.max(320, Math.min(wrap.clientWidth || 680, 900));
+    var narrow = W < 560;
+    var H = narrow ? 380 : 420;
+    var m = { l: narrow ? 52 : 64, r: 14, t: 40, b: 48 };
+    var gap = C.gap;
+    var refs = [{ key: "now", label: "What you raise today", v: C.subsidyNow, color: "var(--ink)" }];
+    refs.push({ key: "fair", label: S.geoKey === "us" ? (narrow ? "All democracy philanthropy" : "All U.S. democracy philanthropy") : (narrow ? "Your area\u2019s share" : S.geoPoss + " share of democracy philanthropy"), v: C.fairShare, color: "var(--slate)" });
+    var HALO = ' stroke="var(--paper)" stroke-width="4" stroke-linejoin="round" paint-order="stroke"';
+
+    var lg = Math.log10;
+    var xLo = Math.pow(10, Math.floor(lg(Math.max(1, S.members))));
+    var xHiRaw = Math.max(C.goal, S.members);
+    refs.forEach(function (r) { xHiRaw = Math.max(xHiRaw, r.v / gap); });
+    var xHi = Math.pow(10, Math.ceil(lg(xHiRaw * 1.15)));
+    if (xHi / xLo < 100) xHi = xLo * 100;
+    var yLo = gap * xLo, yHi = gap * xHi;
+    var lx0 = lg(xLo), lx1 = lg(xHi), ly0 = lg(yLo), ly1 = lg(yHi);
+    var pw = W - m.l - m.r, ph = H - m.t - m.b;
+    function X(v) { return m.l + (lg(v) - lx0) / (lx1 - lx0) * pw; }
+    function Y(v) { return m.t + ph - (lg(v) - ly0) / (ly1 - ly0) * ph; }
+    var fs = narrow ? 11 : 12.5;
+    var o = [];
+    o.push('<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-labelledby="chTitle chDesc" xmlns="http://www.w3.org/2000/svg">');
+    o.push('<title id="chTitle">Outside money needed as membership grows</title>');
+    o.push('<desc id="chDesc">A rising line shows outside funding needed at each membership size, ' + money(gap) + ' per member. It reaches what you raise today at your current size and your area\u2019s share of democracy philanthropy at about ' + people(C.fairShare / gap) + ' members. Your majority goal is ' + people(C.goal) + ' members, needing ' + money(C.fundGap) + ' a year.</desc>');
+
+    // grid + ticks: x decades
+    var dx = lx1 - lx0, stepX = dx > 6 ? 2 : 1;
+    for (var e = Math.ceil(lx0); e <= lx1; e++) {
+      var xv = Math.pow(10, e), xp = X(xv);
+      o.push('<line x1="' + xp + '" x2="' + xp + '" y1="' + m.t + '" y2="' + (m.t + ph) + '" stroke="var(--rule)" stroke-width="1"/>');
+      if ((e - Math.ceil(lx0)) % stepX === 0)
+        o.push('<text x="' + xp + '" y="' + (m.t + ph + 18) + '" font-size="' + fs + '" text-anchor="middle" fill="var(--muted)">' + peopleShort(xv) + "</text>");
+    }
+    var dy = ly1 - ly0, stepY = dy > 6 ? 2 : 1;
+    for (var f = Math.ceil(ly0); f <= ly1; f++) {
+      var yv = Math.pow(10, f), yp = Y(yv);
+      o.push('<line x1="' + m.l + '" x2="' + (m.l + pw) + '" y1="' + yp + '" y2="' + yp + '" stroke="var(--rule)" stroke-width="1"/>');
+      if ((f - Math.ceil(ly0)) % stepY === 0)
+        o.push('<text x="' + (m.l - 8) + '" y="' + (yp + 4) + '" font-size="' + fs + '" text-anchor="end" fill="var(--muted)">' + moneyShort(yv) + "</text>");
+    }
+    o.push('<text x="' + (m.l + pw) + '" y="' + (H - 8) + '" font-size="' + fs + '" text-anchor="end" fill="var(--muted)">Members</text>');
+    o.push('<text x="' + (m.l - 8) + '" y="' + (m.t - 14) + '" font-size="' + fs + '" text-anchor="end" fill="var(--muted)">$ / yr</text>');
+
+    var labels = [];
+    // the rising line (drawn under labels)
+    o.push('<line x1="' + X(xLo) + '" y1="' + Y(yLo) + '" x2="' + X(xHi) + '" y2="' + Y(yHi) + '" stroke="var(--plum)" stroke-width="3.5" stroke-linecap="round"/>');
+    // goal marker
+    var gx = X(C.goal);
+    if (gx >= m.l && gx <= m.l + pw) {
+      o.push('<line x1="' + gx + '" x2="' + gx + '" y1="' + m.t + '" y2="' + (m.t + ph) + '" stroke="var(--green)" stroke-width="2" stroke-dasharray="2 4"/>');
+      var anchorEnd = gx > m.l + pw * 0.55;
+      labels.push('<text x="' + (gx + (anchorEnd ? -6 : 6)) + '" y="' + (m.t - 14) + '" font-size="' + fs + '" font-weight="700" text-anchor="' + (anchorEnd ? "end" : "start") + '" fill="var(--green)">Majority goal: ' + people(C.goal) + ' members</text>');
+    }
+
+    // reference lines with label de-collision
+    var placed = [];
+    refs.forEach(function (r) {
+      var yp = Y(r.v);
+      o.push('<line x1="' + m.l + '" x2="' + (m.l + pw) + '" y1="' + yp + '" y2="' + yp + '" stroke="' + r.color + '" stroke-width="1.5" stroke-dasharray="6 5"/>');
+      var ly = yp - 6;
+      placed.forEach(function (p) { if (Math.abs(p - ly) < fs + 4) ly = p - (fs + 4); });
+      placed.push(ly);
+      labels.push('<text x="' + (m.l + 6) + '" y="' + ly + '" font-size="' + fs + '" fill="' + r.color + '" font-weight="600"' + HALO + '>' + r.label + " (" + moneyShort(r.v) + ")</text>");
+    });
+
+    // ceilings (crossings)
+    refs.forEach(function (r) {
+      var cx = X(r.v / gap), cy = Y(r.v);
+      o.push('<circle cx="' + cx + '" cy="' + cy + '" r="5.5" fill="var(--paper)" stroke="var(--plum)" stroke-width="2.5"/>');
+      var txt = r.key === "now" ? "You today" : "Tops out at " + peopleShort(r.v / gap) + (narrow ? "" : " members");
+      var right = cx < m.l + pw * 0.7;
+      labels.push('<text x="' + (cx + (right ? 10 : -10)) + '" y="' + (cy + 18) + '" font-size="' + fs + '" font-weight="600" text-anchor="' + (right ? "start" : "end") + '" fill="var(--plum)"' + HALO + '>' + txt + "</text>");
+    });
+
+    o.push(labels.join(""));
+    o.push("</svg>");
+    wrap.innerHTML = o.join("");
+  }
+
+  /* ---------------- step reveal ---------------- */
+  function reveal(n, scroll) {
+    for (var i = 1; i <= n; i++) $("s" + i).hidden = false;
+    reached = Math.max(reached, n);
+    render();
+    if (scroll) {
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      $("s" + n).scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+      var h = $("s" + n).querySelector("h2"); h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true });
+    }
+  }
+
+  $("start").addEventListener("click", function () { reveal(1, true); });
+  $("showAll").addEventListener("click", function () {
+    if (!(parseNum($("members").value) >= 1)) fillExample();
+    if ($("geo").value === "") $("geo").value = "cd";
+    reveal(5, false); $("s1").scrollIntoView({ block: "start" });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-next]"), function (b) {
+    b.addEventListener("click", function () { reveal(+b.getAttribute("data-next"), true); });
+  });
+
+  function fillExample() { $("members").value = "400"; $("staff").value = "10"; $("cps").value = "75,000"; }
+  $("example").addEventListener("click", function () { fillExample(); render(); });
+
+  /* ---------------- input wiring ---------------- */
+  function syncDuesMode() {
+    var flat = radioVal("dues") === "custom" && radioVal("duesMode") === "flat";
+    $("duesPre").hidden = !flat;
+    $("duesPost").textContent = flat ? "per member, per year" : "% of income";
+    $("duesCustom").placeholder = flat ? "120" : "1.5";
+    $("duesCustom").inputMode = flat ? "numeric" : "decimal";
+    $("duesCustomLabel").textContent = flat ? "Dues per member, per year, in dollars" : "Custom dues percentage";
+    $("duesFlatHint").hidden = !flat;
+    $("incomeField").hidden = flat;
+    $("incomeSkip").hidden = !flat;
+  }
+  function toggleCustom(name, wrapId, inputId) {
+    var on = radioVal(name) === "custom";
+    $(wrapId).hidden = !on;
+    if (on && document.activeElement && document.activeElement.name === name) $(inputId).focus();
+  }
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t.name === "dues") { toggleCustom("dues", "duesCustomWrap", "duesCustom"); wi.dues = null; }
+    if (t.name === "aligned") toggleCustom("aligned", "alignedCustomWrap", "alignedCustom");
+    if (t.name === "share") toggleCustom("share", "shareCustomWrap", "shareCustom");
+    if (t.id === "duesCustom") wi.dues = null;
+    if (t.name === "duesMode") { $("duesCustom").value = ""; wi.dues = null; $("duesCustom").focus(); }
+    syncDuesMode();
+    if (t.id === "members" || t.id === "staff" || t.id === "cps") wi.ratio = null;
+    if (t.id === "wiRatio") wi.ratio = +t.value;
+    if (t.id === "wiDues") wi.dues = +t.value;
+    render();
+  });
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.id === "income") { $("incomeCustomWrap").hidden = t.value !== "custom"; if (t.value === "custom") $("incomeCustom").focus(); }
+    if (t.id === "geo") { $("popCustomWrap").hidden = t.value !== "custom"; if (t.value === "custom") $("popCustom").focus(); }
+    if (t.name === "dues" || t.name === "aligned" || t.name === "share") {
+      toggleCustom("dues", "duesCustomWrap", "duesCustom");
+      toggleCustom("aligned", "alignedCustomWrap", "alignedCustom");
+      toggleCustom("share", "shareCustomWrap", "shareCustom");
+    }
+    render();
+  });
+  ["members", "cps", "incomeCustom", "popCustom"].forEach(function (id) {
+    $(id).addEventListener("blur", function () { var v = parseNum(this.value); if (isFinite(v)) this.value = commas(v); });
+  });
+  $("wiReset").addEventListener("click", function () { wi.ratio = null; wi.dues = null; render(); });
+
+  var rt;
+  window.addEventListener("resize", function () {
+    clearTimeout(rt);
+    rt = setTimeout(function () { if (!$("s4").hidden && C && C.gap > 0 && C.ok3) render4(); }, 120);
+  });
+  $("more4").addEventListener("toggle", function () { if (this.open && C && C.gap > 0 && C.ok3) drawChart(); });
+
+  /* ---------------- share / restore ---------------- */
+  function encode() {
+    var p = new URLSearchParams();
+    p.set("m", parseNum($("members").value) || "");
+    p.set("s", isFinite(parseNum($("staff").value)) ? parseNum($("staff").value) : "");
+    p.set("c", parseNum($("cps").value) || "");
+    p.set("d", radioVal("dues")); if (radioVal("dues") === "custom") { p.set("dc", parseNum($("duesCustom").value)); p.set("dm", radioVal("duesMode")); }
+    p.set("i", $("income").value); if ($("income").value === "custom") p.set("ic", parseNum($("incomeCustom").value));
+    p.set("g", $("geo").value); if ($("geo").value === "custom") p.set("gc", parseNum($("popCustom").value));
+    p.set("a", radioVal("aligned")); if (radioVal("aligned") === "custom") p.set("ac", parseNum($("alignedCustom").value));
+    p.set("sh", radioVal("share")); if (radioVal("share") === "custom") p.set("shc", parseNum($("shareCustom").value));
+    return p.toString();
+  }
+  function restore() {
+    if (!location.hash || location.hash.length < 3) return false;
+    var p = new URLSearchParams(location.hash.slice(1));
+    if (!p.get("m")) return false;
+    $("members").value = commas(+p.get("m"));
+    $("staff").value = p.get("s") || "";
+    if (p.get("c")) $("cps").value = commas(+p.get("c"));
+    if (p.get("d")) setRadio("dues", p.get("d")); if (p.get("dc")) $("duesCustom").value = p.get("dc"); if (p.get("dm")) setRadio("duesMode", p.get("dm"));
+    if (p.get("i")) $("income").value = p.get("i"); if (p.get("ic")) $("incomeCustom").value = commas(+p.get("ic"));
+    if (p.get("g") != null) $("geo").value = p.get("g"); if (p.get("gc")) $("popCustom").value = commas(+p.get("gc"));
+    if (p.get("a")) setRadio("aligned", p.get("a")); if (p.get("ac")) $("alignedCustom").value = p.get("ac");
+    if (p.get("sh")) setRadio("share", p.get("sh")); if (p.get("shc")) $("shareCustom").value = p.get("shc");
+    $("duesCustomWrap").hidden = radioVal("dues") !== "custom";
+    $("alignedCustomWrap").hidden = radioVal("aligned") !== "custom";
+    $("shareCustomWrap").hidden = radioVal("share") !== "custom";
+    $("incomeCustomWrap").hidden = $("income").value !== "custom";
+    $("popCustomWrap").hidden = $("geo").value !== "custom";
+    syncDuesMode();
+    return true;
+  }
+  $("share").addEventListener("click", function () {
+    var url = location.href.split("#")[0] + "#" + encode();
+    try { history.replaceState(null, "", url); } catch (err) {}
+    var done = function () { $("shareMsg").textContent = "Link copied"; };
+    var fail = function () { $("shareMsg").textContent = "Copy this link from your address bar."; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, fail);
+    else fail();
+  });
+  $("reset").addEventListener("click", function () {
+    try { history.replaceState(null, "", location.href.split("#")[0]); } catch (err) {}
+    location.reload();
+  });
+
+  /* ---------------- init ---------------- */
+  if (restore()) { reveal(5, false); }
+  else render();
+})();
 </script>
 </body>
 </html>
